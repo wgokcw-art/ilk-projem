@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+/* Diğer CSS kodların buraya gelsin */
+@import "tailwindcss";
+
+/* ☀️ AYDINLIK MOD (Varsayılan Görünüm) */
+html {
+  background-color: #f9fafb;
+  color: #171717;
+  transition: filter 0.3s ease;
+}
+
+/* 🌙 KARANLIK MOD */
+html.dark {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* 🌟 KARANLIK MODDA YAZILARI BELİRGİNLEŞTİRME VE PARLATMA */
+html.dark p,
+html.dark span,
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+html.dark a,
+html.dark label,
+html.dark input,
+html.dark textarea,
+html.dark button {
+  /* Filtre yüzünden matlaşan yazıları tarayıcı seviyesinde keskinleştirir */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  
+  /* Yazı fontunu bir tık kalınlaştırarak (semi-bold efekti) okunabilirliği uçurur */
+  font-weight: 500 !important;
+  
+  /* Yazıların arkasına çok hafif beyaz bir parlama koyarak harfleri patlatır */
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.4);
+  
+  /* Opaklık (siliklik) sorunları varsa tamamen görünür yapar */
+  opacity: 1 !important;
+}
+
+/* Medyaları koru */
+html.dark img, 
+html.dark video, 
+html.dark audio,
+html.dark svg,
+html.dark [style*="background-image"] {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+html.dark img, 
+html.dark video, 
+html.dark audio,
+html.dark svg {
+  transition: filter 0.3s ease;
+}
