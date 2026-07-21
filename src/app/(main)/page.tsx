@@ -2,12 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { auth, db } from "../../firebaseConfig"; // Klasör yapına göre rota grubundan (main) iki üst dizine çıkıp firebaseConfig'e ulaşıyoruz
+import { auth, db } from "../../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 
-// ☁️ CLOUDINARY AYARLARI: cloudinary.com hesabınızdaki Cloud Name ve
-// Settings > Upload > Upload Presets altında oluşturduğunuz "Unsigned" preset.
 const CLOUDINARY_CLOUD_NAME = "ng89mhgm";
 const CLOUDINARY_UPLOAD_PRESET = "ses_asistani";
 
@@ -21,12 +19,12 @@ export default function AnaSayfa() {
   // Orijinal State'ler (Aynen Korundu)
   const [kaydediyor, setKaydediyor] = useState(false);
   const [sesUrl, setSesUrl] = useState<string | null>(null);
-  const [sesBlob, setSesBlob] = useState<Blob | null>(null); // Buluta yüklenecek ham ses verisi
+  const [sesBlob, setSesBlob] = useState<Blob | null>(null);
   const [sure, setSure] = useState(0);
   const [seciliKlasor, setSeciliKlasor] = useState<string>("toplantilarSesleri");
   const [istemciHazir, setIstemciHazir] = useState(false);
-  const [transferEdiliyor, setTransferEdiliyor] = useState(false); // Bulut yükleme sırasında butonu kilitlemek için
-  const [menuAcik, setMenuAcik] = useState(false); // Sadece mobilde: hamburger menü (klasörler) acik/kapali durumu
+  const [transferEdiliyor, setTransferEdiliyor] = useState(false);
+  const [menuAcik, setMenuAcik] = useState(false); // Sadece mobilde açılan sol panel
 
   const [aramaKelimesi, setAramaKelimesi] = useState<string>("");
   const [siralamYonu, setSiralamaYonu] = useState<string>("yeni");
@@ -43,7 +41,6 @@ export default function AnaSayfa() {
   const zamanlayiciRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 🎯 GÜVENLİK KAPISI: Firebase Giriş Kontrolü & Kullanıcıyı Belleğe Alma
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (!currentUser) {
@@ -57,7 +54,6 @@ export default function AnaSayfa() {
     return () => unsubscribe();
   }, [router]);
 
-  // ☁️ CLOUD VERİ ÇEKME: Sadece giriş yapan kullanıcının Firestore bulutundaki seslerini çeker
   const buluttanSesleriCek = async (aktifKullanici: any) => {
     if (!aktifKullanici) return;
 
@@ -77,7 +73,6 @@ export default function AnaSayfa() {
     }
   };
 
-  // 🔄 Firebase'den kullanıcı bilgisi geldiği an listeyi günceller
   useEffect(() => {
     if (user) {
       buluttanSesleriCek(user);
@@ -210,7 +205,6 @@ export default function AnaSayfa() {
     }
   };
 
-  // ☁️ GÜVENLİK KORUMALI BULUT KAYIT METODU (SIFIR KİLİTLENME)
   const klasoreGonder = async () => {
     if (!sesBlob || !user) {
       console.warn("Transfer iptal edildi: Ses verisi veya kullanıcı oturumu eksik.");
@@ -250,13 +244,11 @@ export default function AnaSayfa() {
 
       formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
 
-      console.log("1. Cloudinary köprü isteği gönderiliyor...");
       const response = await fetch("/api/ses-yukle", {
         method: "POST",
         body: formData,
       });
 
-      console.log("2. Sunucudan yanıt alındı, HTTP Kodu:", response.status);
       const sonuc = await response.json().catch(() => null);
       const kaliciInternetLinki = sonuc?.secure_url || sonuc?.url || (typeof sonuc === "string" ? sonuc : null);
 
@@ -274,13 +266,8 @@ export default function AnaSayfa() {
         olusturmaZamani: Date.now(),
       };
 
-      console.log("3. Firestore'a yazma işlemi tetikleniyor...", yeniSes);
-      
       try {
         await addDoc(collection(db, "sesler"), yeniSes);
-        console.log(`🎉 "${otomatikIsim}" başarıyla Firestore'a kaydedildi!`);
-        
-        // Tarayıcı blokajlarını aşmak için arayüzü doğrudan güncelliyoruz
         setSesUrl(null);
         setSesBlob(null);
         setSure(0);
@@ -292,8 +279,6 @@ export default function AnaSayfa() {
     } catch (error: any) {
       console.error("❌ Genel Transfer Hatası:", error);
     } finally {
-      console.log("4. Transfer Merkezi döngüsü tamamlandı, buton kilidi açılıyor.");
-      // Tarayıcı ne yaparsa yapsın bu kilit kesin olarak kalkar
       setTransferEdiliyor(false);
     }
   };
@@ -316,19 +301,23 @@ export default function AnaSayfa() {
 
   return (
     <div className="w-full min-h-screen bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 flex flex-col justify-start items-center p-4 sm:p-6 md:p-8 transition-colors duration-300">
-      {/* 📱 SADECE MOBİL: Hamburger menü açılınca gelen klasör sekmesi. Masaüstü görünümüne dokunulmadı. */}
+      
+      {/* 📱 SADECE MOBİL: Sol taraftan açılan yan panel (Drawer Menu) */}
       {menuAcik && (
-        <div className="md:hidden fixed inset-0 z-50">
+        <div className="block md:hidden fixed inset-0 z-50">
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
             onClick={() => setMenuAcik(false)}
           />
-          <div className="absolute left-0 top-0 h-full w-72 max-w-[82%] bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 shadow-2xl p-5 space-y-6 overflow-y-auto">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xs font-black uppercase tracking-widest text-neutral-500 dark:text-neutral-400">Klasörler</h2>
+          <div className="absolute left-0 top-0 h-full w-72 max-w-[85%] bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 shadow-2xl p-5 space-y-6 overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-4">
+              <div className="flex items-center gap-2">
+                <span className="text-neutral-400 dark:text-neutral-500 font-bold">{"[-]"}</span>
+                <h2 className="text-sm font-black tracking-tight text-neutral-900 dark:text-white">Ses Asistanı</h2>
+              </div>
               <button
                 onClick={() => setMenuAcik(false)}
-                className="p-1.5 rounded-lg text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white transition-colors"
+                className="p-1.5 rounded-lg text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800 transition-colors"
                 aria-label="Menüyü Kapat"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -337,88 +326,117 @@ export default function AnaSayfa() {
               </button>
             </div>
 
-            <nav className="space-y-1.5">
-              <button
-                onClick={() => { setMenuAcik(false); router.push("/toplantilar"); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
-              >
-                <svg className="w-[18px] h-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                </svg>
-                Toplantılar
-              </button>
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 px-3 mb-2">Menü</p>
+              <nav className="space-y-1">
+                {/* 📩 GELEN KUTUSU EKLENDİ */}
+                <button
+                  onClick={() => { setMenuAcik(false); router.push("/gelen-kutusu"); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
+                >
+                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                  </svg>
+                  Gelen Kutusu
+                </button>
 
-              <button
-                onClick={() => { setMenuAcik(false); router.push("/ders-notlari"); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
-              >
-                <svg className="w-[18px] h-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-                </svg>
-                Ders Notları
-              </button>
+                <button
+                  onClick={() => { setMenuAcik(false); router.push("/toplantilar"); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
+                >
+                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                  </svg>
+                  Toplantılar
+                </button>
 
-              <button
-                onClick={() => { setMenuAcik(false); router.push("/gunluk"); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
-              >
-                <svg className="w-[18px] h-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-                </svg>
-                Günlük
-              </button>
+                <button
+                  onClick={() => { setMenuAcik(false); router.push("/ders-notlari"); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
+                >
+                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                  </svg>
+                  Ders Notları
+                </button>
 
-              <button
-                onClick={() => { setMenuAcik(false); router.push("/cop-kutusu"); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
-              >
-                <svg className="w-[18px] h-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                </svg>
-                Çöp Kutusu
-              </button>
+                <button
+                  onClick={() => { setMenuAcik(false); router.push("/gunluk"); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
+                >
+                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                  </svg>
+                  Günlük
+                </button>
 
-              <button
-                onClick={() => { setMenuAcik(false); router.push("/profil"); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
-              >
-                <svg className="w-[18px] h-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                </svg>
-                Profil
-              </button>
-            </nav>
+                <button
+                  onClick={() => { setMenuAcik(false); router.push("/cop-kutusu"); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
+                >
+                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                  </svg>
+                  Çöp Kutusu
+                </button>
+
+                <button
+                  onClick={() => { setMenuAcik(false); router.push("/profil"); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
+                >
+                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                  </svg>
+                  Profil
+                </button>
+              </nav>
+            </div>
+
+            {user?.email && (
+              <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800">
+                <p className="text-[10px] font-bold text-neutral-400 truncate">Kullanıcı:</p>
+                <p className="text-xs font-bold text-neutral-700 dark:text-neutral-300 truncate">{user.email}</p>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       <div className="w-full max-w-4xl space-y-5 sm:space-y-6">
 
-        <button
-          onClick={() => setMenuAcik(true)}
-          className="md:hidden flex items-center gap-2 px-3 py-2 -ml-1 mb-1 rounded-xl border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-100 active:scale-95 transition-all dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-800"
-          aria-label="Menüyü Ac"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
-          </svg>
-          <span className="text-xs font-black tracking-widest uppercase">Menü</span>
-        </button>
+        {/* 📱 SADECE MOBİL: Sol taraftaki paneli açan menü butonu (Mobil üst bilgi) */}
+        <div className="flex md:hidden items-center justify-between w-full mb-1">
+          <button
+            onClick={() => setMenuAcik(true)}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl border border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-100 active:scale-95 transition-all dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-200 shadow-3xs"
+            aria-label="Menüyü Aç"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+            </svg>
+            <span className="text-xs font-black tracking-wider uppercase">Menü</span>
+          </button>
 
-        <div className="hidden md:flex w-full border-b border-neutral-200 dark:border-neutral-800 pb-6 md:flex-row items-start md:items-center justify-between gap-4">
+          <span className="text-xs font-black text-neutral-400 dark:text-neutral-500">
+            {"[-]"} Ses Asistanı
+          </span>
+        </div>
+
+        {/* 💻 SADECE MASAÜSTÜ: Üst Header Bilgisi & Arama/Sıralama (Mobilde KESİNLİKLE GİZLİ) */}
+        <div className="hidden md:flex w-full border-b border-neutral-200 dark:border-neutral-800 pb-6 flex-row items-center justify-between gap-4">
           <div className="space-y-1">
             <p className="text-sm font-bold text-neutral-500 dark:text-neutral-400 mb-1">
               👋 Hoş geldin, <span className="text-neutral-900 dark:text-neutral-100">{user?.email}</span>
             </p>
-            <h1 className="text-xl sm:text-2xl font-black flex items-center gap-2 tracking-tight">
-              <span className="text-neutral-400 dark:text-neutral-500 text-lg sm:text-xl">{"[-]"}</span> Ses Asistani
+            <h1 className="text-2xl font-black flex items-center gap-2 tracking-tight">
+              <span className="text-neutral-400 dark:text-neutral-500 text-xl">{"[-]"}</span> Ses Asistani
             </h1>
             <p className="text-neutral-500 dark:text-neutral-400 text-xs font-semibold">
               Kayit yapin veya arti butonundan dosya yükleyerek buluta transfer edin.
             </p>
           </div>
 
-          <div className="w-full md:w-80 flex flex-col sm:flex-row items-center gap-2 bg-white dark:bg-neutral-900 p-1.5 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xs">
+          <div className="w-80 flex items-center gap-2 bg-white dark:bg-neutral-900 p-1.5 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xs">
             <div className="relative w-full">
               <input
                 type="text"
@@ -434,7 +452,7 @@ export default function AnaSayfa() {
             <select
               value={siralamYonu}
               onChange={(e) => setSiralamaYonu(e.target.value)}
-              className="w-full sm:w-auto px-2.5 py-1.5 text-xs font-black text-neutral-900 bg-white dark:bg-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:outline-none whitespace-nowrap cursor-pointer hover:border-neutral-300"
+              className="px-2.5 py-1.5 text-xs font-black text-neutral-900 bg-white dark:bg-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:outline-none whitespace-nowrap cursor-pointer hover:border-neutral-300"
             >
               <option value="yeni">Yeni</option>
               <option value="eski">Eski</option>
