@@ -405,7 +405,7 @@ export default function AnaSayfa() {
           <span className="text-xs font-black tracking-widest uppercase">Menü</span>
         </button>
 
-        <div className="w-full border-b border-neutral-200 dark:border-neutral-800 pb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="hidden md:flex w-full border-b border-neutral-200 dark:border-neutral-800 pb-6 md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
             <p className="text-sm font-bold text-neutral-500 dark:text-neutral-400 mb-1">
               👋 Hoş geldin, <span className="text-neutral-900 dark:text-neutral-100">{user?.email}</span>
