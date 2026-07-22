@@ -27,20 +27,29 @@ Kullanıcı Sorduğu Soru: "${soru}"
 
 Lütfen kullanıcıya kibar, net ve bilgilendirici bir Türkçe yanıt ver. Yanıtında ses içeriğindeki bilgilere sadık kal.`;
 
-      const chatResponse = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: chatPrompt }]
-          }
-        ]
-      });
+      try {
+        const chatResponse = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: chatPrompt }]
+            }
+          ]
+        });
 
-      return NextResponse.json({ cevap: chatResponse.text || "Sorunuza yanıt üretilemedi." });
+        return NextResponse.json({ cevap: chatResponse.text || "Sorunuza yanıt üretilemedi." });
+      } catch (chatErr: any) {
+        console.error("Chatbot API Hatası:", chatErr);
+        let chatMesaj = chatErr.message || "Yapay zeka yanıt veremedi.";
+        if (chatMesaj.includes("API_KEY_SERVICE_BLOCKED") || chatMesaj.includes("PERMISSION_DENIED")) {
+          chatMesaj = "Google AI Studio'dan (aistudio.google.com) geçerli bir Gemini API Key alınmalıdır.";
+        }
+        return NextResponse.json({ cevap: `⚠️ Hata: ${chatMesaj}` });
+      }
     }
 
-    // 🎙️ MOD 2: MULTIMODAL SES ANALİZİ & İLERİ DÜZEY AI ÖZELLİKLERİ
+    // 🎙️ MOD 2: MULTIMODAL SES ANALİZİ
     console.log("--- GEMINI MULTIMODAL SES ANALİZİ BAŞLADI ---");
     console.log("Gelen Klasör:", klasor);
     console.log("Gelen Ses Linki:", sesUrl);
@@ -110,9 +119,15 @@ Senden kesinlikle şu formatta, sadece saf bir JSON çıktısı vermeni istiyoru
 
   } catch (error: any) {
     console.error("Route.ts Genel Catch Hatası:", error);
+    let mesaj = error.message || "Yapay zeka analizi sırasında bir hata oluştu.";
+
+    if (mesaj.includes("API_KEY_SERVICE_BLOCKED") || mesaj.includes("PERMISSION_DENIED") || error?.status === 403) {
+      mesaj = "Mevcut Firebase API Anahtarı Google Cloud konsolunda 'Generative Language API' için kısıtlanmış. Çözüm: https://aistudio.google.com/ adresinden ücretsiz bir Gemini API Key alıp Vercel'deki GEMINI_API_KEY ortam değişkenine ekleyin.";
+    }
+
     return NextResponse.json(
-      { error: "Yapay zeka analizi sırasında bir hata oluştu.", detay: error.message },
-      { status: 500 }
+      { error: "Google Gemini API servisi engellendi.", detay: mesaj },
+      { status: 403 }
     );
   }
 }

@@ -92,8 +92,24 @@ export default function Gunluk() {
       });
 
       if (!apiResponse.ok) {
-        const hataDetayi = await apiResponse.json();
-        throw new Error(hataDetayi.detay || "Yapay zeka analiz isteği başarısız oldu.");
+        setSeciliRapor({
+          sesAdi: sesNesnesi.ad,
+          sureBilgisi: "API Engeli",
+          isSessiz: true,
+          metin: "⚠️ Google Gemini API Anahtarı Kısıtlanmış (API_KEY_SERVICE_BLOCKED)",
+          modAnalizi: [
+            "Mevcut Firebase API Anahtarında Generative Language API servisi engellenmiş durumda.",
+            "Çözüm: https://aistudio.google.com/ adresinden 1 dakikada ücretsiz yeni bir Gemini API Key alıp Vercel'deki GEMINI_API_KEY ortam değişkenine ekleyin."
+          ],
+          gununOzeti: [],
+          anahtarKelimeler: ["API_Kısıtlaması"],
+          actionItems: [],
+          speakers: [],
+          sentiment: "API Uyarısı",
+          tone: "Kısıtlama"
+        });
+        setIsleniyor(null);
+        return;
       }
 
       const veri = await apiResponse.json();

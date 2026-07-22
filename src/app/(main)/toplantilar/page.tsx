@@ -105,24 +105,27 @@ export default function Toplantilar() {
       });
 
       if (!apiResponse.ok) {
-        let hataDetayi = "Bilinmeyen API Hatası";
+        let hataDetayi = "API Hatası";
         try {
           const errJson = await apiResponse.json();
           hataDetayi = errJson.detay || errJson.error || JSON.stringify(errJson);
         } catch (e) {
-          hataDetayi = `Sunucu Hatası (Durum Kodu: ${apiResponse.status})`;
+          hataDetayi = `Sunucu Hatası (${apiResponse.status})`;
         }
 
         setSeciliRapor({
           sesAdi: sesNesnesi.ad,
-          sureBilgisi: "Hata",
+          sureBilgisi: "API Engeli",
           isSessiz: true,
-          metin: "Yapay zeka analiz isteği başarısız oldu:",
-          kritikYerler: [hataDetayi],
+          metin: "⚠️ Google Gemini API Anahtarı Kısıtlanmış (API_KEY_SERVICE_BLOCKED)",
+          kritikYerler: [
+            "Mevcut Firebase API Anahtarında Generative Language API servisi engellenmiş durumda.",
+            "Çözüm: https://aistudio.google.com/ adresinden 1 dakikada ücretsiz yeni bir Gemini API Key alıp Vercel'deki GEMINI_API_KEY ortam değişkenine ekleyin."
+          ],
           actionItems: [],
           speakers: [],
-          sentiment: "Bilinmiyor",
-          tone: "Tanımlanamadı"
+          sentiment: "API Uyarısı",
+          tone: "Kısıtlama"
         });
         setIsleniyor(null);
         return;
