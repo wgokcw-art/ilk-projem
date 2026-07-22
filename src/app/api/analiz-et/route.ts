@@ -43,7 +43,7 @@ Lütfen kullanıcıya kibar, net ve bilgilendirici bir Türkçe yanıt ver. Yan�
         console.error("Chatbot API Hatası:", chatErr);
         let chatMesaj = chatErr.message || "Yapay zeka yanıt veremedi.";
         if (chatMesaj.includes("API_KEY_SERVICE_BLOCKED") || chatMesaj.includes("PERMISSION_DENIED")) {
-          chatMesaj = "Google AI Studio'dan (aistudio.google.com) geçerli bir Gemini API Key alınmalıdır.";
+          chatMesaj = "Google AI Studio'dan (aistudio.google.com) geçerli bir Gemini API Key alınıp Vercel GEMINI_API_KEY değişkenine eklenmelidir.";
         }
         return NextResponse.json({ cevap: `⚠️ Hata: ${chatMesaj}` });
       }
