@@ -324,47 +324,22 @@ export default function AnaSayfa() {
       
       <div className="w-full max-w-4xl space-y-5 sm:space-y-6">
 
-        {/* 📱 SADECE MOBİL: Mobil Arama & Filtreleme Barı */}
-        <div className="flex md:hidden w-full flex-col gap-2">
-          <div className="w-full flex items-center gap-2 bg-white dark:bg-neutral-900 p-2 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xs">
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Tüm klasörlerde ara..."
-                value={aramaKelimesi}
-                onChange={(e) => setAramaKelimesi(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 text-xs font-bold text-neutral-900 bg-neutral-50 border border-neutral-100 dark:bg-neutral-800 dark:text-white dark:border-neutral-700 rounded-xl focus:outline-none placeholder-neutral-400"
-              />
-              <svg className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.603 10.602Z" />
-              </svg>
-            </div>
-            <select
-              value={siralamYonu}
-              onChange={(e) => setSiralamaYonu(e.target.value)}
-              className="px-2.5 py-2 text-xs font-black text-neutral-900 bg-white dark:bg-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:outline-none cursor-pointer"
-            >
-              <option value="yeni">Yeni</option>
-              <option value="eski">Eski</option>
-            </select>
-          </div>
-        </div>
-
-        {/* 💻 SADECE MASAÜSTÜ: Üst Header Bilgisi & Arama/Sıralama (Mobilde KESİNLİKLE GİZLİ) */}
-        <div className="hidden md:flex w-full border-b border-neutral-200 dark:border-neutral-800 pb-6 flex-row items-center justify-between gap-4">
+        {/* 🎙️ ANA SAYFA BÖLÜM BAŞLIĞI (Hem Mobilde Hem Masaüstünde Görünür) */}
+        <div className="w-full border-b border-neutral-200 dark:border-neutral-800 pb-5 pt-2 sm:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <p className="text-sm font-bold text-neutral-500 dark:text-neutral-400 mb-1">
+            <p className="text-xs sm:text-sm font-bold text-neutral-500 dark:text-neutral-400">
               👋 Hoş geldin, <span className="text-neutral-900 dark:text-neutral-100">{user?.email}</span>
             </p>
-            <h1 className="text-2xl font-black flex items-center gap-2 tracking-tight">
-              <span className="text-neutral-400 dark:text-neutral-500 text-xl">{"[-]"}</span> Ses Asistani
+            <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-2 tracking-tight text-neutral-900 dark:text-white">
+              <span className="text-neutral-400 dark:text-neutral-500 text-xl">{"[-]"}</span> Ses Asistanı
             </h1>
             <p className="text-neutral-500 dark:text-neutral-400 text-xs font-semibold">
-              Kayit yapin veya arti butonundan dosya yükleyerek buluta transfer edin.
+              Kayıt yapın veya artı (+) butonundan dosya yükleyerek buluta transfer edin.
             </p>
           </div>
 
-          <div className="w-80 flex items-center gap-2 bg-white dark:bg-neutral-900 p-1.5 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xs">
+          {/* Arama & Sıralama Kutusu */}
+          <div className="w-full md:w-80 flex items-center gap-2 bg-white dark:bg-neutral-900 p-1.5 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xs">
             <div className="relative w-full">
               <input
                 type="text"
@@ -380,7 +355,7 @@ export default function AnaSayfa() {
             <select
               value={siralamYonu}
               onChange={(e) => setSiralamaYonu(e.target.value)}
-              className="px-2.5 py-1.5 text-xs font-black text-neutral-900 bg-white dark:bg-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:outline-none whitespace-nowrap cursor-pointer hover:border-neutral-300"
+              className="px-2.5 py-1.5 text-xs font-black text-neutral-900 bg-white dark:bg-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:outline-none cursor-pointer hover:border-neutral-300"
             >
               <option value="yeni">Yeni</option>
               <option value="eski">Eski</option>

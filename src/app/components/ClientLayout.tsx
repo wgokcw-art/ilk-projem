@@ -197,11 +197,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 shadow-sm">
-                    S
+                    K
                   </div>
                   <div>
-                    <h2 className="text-sm font-black text-neutral-900 dark:text-white">Ses Asistanı</h2>
-                    <p className="text-[10px] font-bold text-neutral-400">Navigasyon Menüsü</p>
+                    <h2 className="text-sm font-black text-neutral-900 dark:text-white">Klasörler & Menü</h2>
+                    <p className="text-[10px] font-bold text-neutral-400">Gezinti Listesi</p>
                   </div>
                 </div>
                 
