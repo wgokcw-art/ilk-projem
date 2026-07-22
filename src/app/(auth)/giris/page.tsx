@@ -1,22 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from "next/navigation";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../firebaseConfig";
 
 export default function GirisSayfasi() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isNight, setIsNight] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [hataMesaji, setHataMesaji] = useState("");
   
   const [displayText, setDisplayText] = useState("");
   const [currentTime, setCurrentTime] = useState("");
   const fullText = "SES ASİSTANI";
 
   useEffect(() => {
+    // Oturum zaten açıksa doğrudan ana sayfaya yönlendir
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        window.location.href = "/";
+      }
+    });
+
     const hour = new Date().getHours();
     setIsNight(hour >= 18 || hour < 6);
 
@@ -31,23 +41,51 @@ export default function GirisSayfasi() {
       if (i > fullText.length) clearInterval(interval);
     }, 150);
 
-    return () => { clearInterval(interval); clearInterval(timer); };
+    return () => { 
+      unsubscribe();
+      clearInterval(interval); 
+      clearInterval(timer); 
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) {
+      setHataMesaji("Lütfen e-posta ve şifrenizi girin.");
+      return;
+    }
     setLoading(true);
+    setHataMesaji("");
     try {
       if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = "/";
+        const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+        if (cred.user) {
+          window.location.href = "/";
+        }
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
-        alert("Kayıt başarılı!");
-        setIsLogin(true);
+        const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
+        if (cred.user) {
+          window.location.href = "/";
+        }
       }
     } catch (error: any) {
-      alert("Hata: " + error.message);
+      console.error("Giriş/Kayıt Hatası:", error);
+      let mesaj = "Giriş yapılırken bir sorun oluştu.";
+      const errCode = error?.code || error?.message || "";
+
+      if (errCode.includes("invalid-credential") || errCode.includes("user-not-found") || errCode.includes("wrong-password")) {
+        mesaj = "E-posta adresi veya şifre hatalı.";
+      } else if (errCode.includes("email-already-in-use")) {
+        mesaj = "Bu e-posta adresi ile zaten kayıtlı bir hesap var.";
+      } else if (errCode.includes("weak-password")) {
+        mesaj = "Şifreniz en az 6 karakter olmalıdır.";
+      } else if (errCode.includes("invalid-email")) {
+        mesaj = "Lütfen geçerli bir e-posta adresi girin.";
+      } else if (error.message) {
+        mesaj = error.message;
+      }
+
+      setHataMesaji(mesaj);
     } finally {
       setLoading(false);
     }
@@ -114,6 +152,11 @@ export default function GirisSayfasi() {
           </p>
           
           <form onSubmit={handleSubmit} className="space-y-5">
+            {hataMesaji && (
+              <div className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold text-center">
+                ⚠️ {hataMesaji}
+              </div>
+            )}
             <input 
               type="email" 
               autoFocus

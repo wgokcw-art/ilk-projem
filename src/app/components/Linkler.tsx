@@ -15,12 +15,12 @@ export default function Linkler({ karanlikMod }: { karanlikMod: boolean }) {
     { ad: "Ders Notları", yol: "/ders-notlari" },
     { ad: "Günlük", yol: "/gunluk" },
     // 🛠️ DÜZELTME: Rota, dosya sistemindeki 'çöp kutusu' klasör adına göre güncellendi.
-    { ad: "Çöp Kutusu", yol: "/çöp kutusu" },
+    { ad: "Çöp Kutusu", yol: "/cop-kutusu" },
     { ad: "Profil", yol: "/profil" }
   ];
 
   return (
-    <div className="flex items-center gap-1 bg-transparent p-1">
+    <div className="hidden md:flex items-center gap-1 bg-transparent p-1">
       {menuItems.map((item) => {
         // Eğer tarayıcıdaki adres ile menünün adresi eşleşiyorsa o buton AKTİFTİR
         const isActive = pathname === item.yol;

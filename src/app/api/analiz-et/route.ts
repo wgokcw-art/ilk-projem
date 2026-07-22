@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
+export const maxDuration = 180; // Uzun seslerin Gemini AI analizleri için rotayı açık tutar
+
 // Yeni kurulan resmi Google AI SDK'sını çevre değişkenindeki anahtar ile başlatıyoruz
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+const ai = new GoogleGenAI({ apiKey: apiKey || "" });
 
 export async function POST(request: Request) {
   try {

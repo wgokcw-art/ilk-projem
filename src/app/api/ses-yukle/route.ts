@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const CLOUDINARY_CLOUD_NAME = "ng89mhgm";
+export const maxDuration = 180; // 3 dakikaya kadar uzun sürse dahi Next.js rotasını açık tutar
+
+const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || "ng89mhgm";
 
 export async function POST(req: NextRequest) {
   try {
     const gelenFormData = await req.formData();
     const dosya = gelenFormData.get("file") as File | null;
-    const uploadPreset = gelenFormData.get("upload_preset") as string | null;
+    const uploadPreset = (gelenFormData.get("upload_preset") as string | null) || process.env.CLOUDINARY_UPLOAD_PRESET || "ses_asistani";
 
-    if (!dosya || !uploadPreset) {
-      return NextResponse.json({ error: "Dosya veya upload_preset eksik." }, { status: 400 });
+    if (!dosya) {
+      return NextResponse.json({ error: "Yüklenecek ses dosyası bulunamadı." }, { status: 400 });
     }
 
     // 🛠️ DÜZELTME: Gelen ham veriyi Cloudinary'nin kusursuz okuyabilmesi için 
@@ -27,8 +29,9 @@ export async function POST(req: NextRequest) {
     cloudinaryFormData.append("file", fileToUpload);
     cloudinaryFormData.append("upload_preset", uploadPreset);
 
+    // 10+ dakikalık büyük ses kayıtları için zaman aşımını 180 saniyeye (3 dakika) yükseltiyoruz
     const kontrolci = new AbortController();
-    const zamanAsimi = setTimeout(() => kontrolci.abort(), 25000);
+    const zamanAsimi = setTimeout(() => kontrolci.abort(), 180000);
 
     let cloudinaryYaniti: Response;
     try {
@@ -55,7 +58,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (!cloudinaryYaniti.ok || !sonuc?.secure_url) {
-      const detay = sonuc?.error?.message || `Cloudinary HTTP ${cloudinaryYaniti.status}`;
+      let detay = sonuc?.error?.message || `Cloudinary HTTP ${cloudinaryYaniti.status}`;
+      if (detay.toLowerCase().includes("upload preset") || detay.toLowerCase().includes("preset")) {
+        detay = `Cloudinary Upload Preset ('${uploadPreset}') geçersiz veya bulunamadı. Lütfen Cloudinary ayarlarını kontrol edin.`;
+      }
       console.error("Cloudinary yukleme hatasi:", detay);
       return NextResponse.json({ error: detay }, { status: 502 });
     }
@@ -70,8 +76,8 @@ export async function POST(req: NextRequest) {
     console.error("Sunucu tarafi Cloudinary yukleme hatasi:", error);
     const mesaj =
       error?.name === "AbortError"
-        ? "Cloudinary sunucu tarafında 25 saniye içinde yanıt vermedi."
-        : "Sunucu tarafında beklenmeyen bir hata oluştu.";
+        ? "Ses dosyası yükleme işlemi zaman aşımına uğradı (90 saniye)."
+        : error.message || "Sunucu tarafında beklenmeyen bir hata oluştu.";
     return NextResponse.json({ error: mesaj }, { status: 500 });
   }
 }

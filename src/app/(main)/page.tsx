@@ -24,7 +24,6 @@ export default function AnaSayfa() {
   const [seciliKlasor, setSeciliKlasor] = useState<string>("toplantilarSesleri");
   const [istemciHazir, setIstemciHazir] = useState(false);
   const [transferEdiliyor, setTransferEdiliyor] = useState(false);
-  const [menuAcik, setMenuAcik] = useState(false); // Sadece mobilde açılan sol panel
 
   const [aramaKelimesi, setAramaKelimesi] = useState<string>("");
   const [siralamYonu, setSiralamaYonu] = useState<string>("yeni");
@@ -128,7 +127,15 @@ export default function AnaSayfa() {
       analyserRef.current = analyser;
       dataArrayRef.current = dataArray;
 
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
+      let recorderMimeType = "audio/webm;codecs=opus";
+      if (!MediaRecorder.isTypeSupported(recorderMimeType)) {
+        recorderMimeType = MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, {
+        ...(recorderMimeType ? { mimeType: recorderMimeType } : {}),
+        audioBitsPerSecond: 64000, // 64 kbps stüdyo netliği - 10 dakikalık kayıt sadece ~4.5 MB olur!
+      });
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
@@ -171,8 +178,13 @@ export default function AnaSayfa() {
   const dosyaYukle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const dosya = e.target.files?.[0];
     if (!dosya) return;
-    if (!dosya.type.startsWith("audio/")) {
-      alert("Lütfen sadece gecerli bir ses dosyasi secin!");
+    
+    const gecerliUzantilar = /\.(mp3|m4a|wav|webm|ogg|aac|flac|mp4|m4b|wma|amr)$/i;
+    const isAudioType = dosya.type ? dosya.type.startsWith("audio/") || dosya.type.startsWith("video/webm") : false;
+    const isAudioExt = gecerliUzantilar.test(dosya.name);
+
+    if (!isAudioType && !isAudioExt) {
+      alert("Lütfen geçerli bir ses dosyası seçin! (.mp3, .m4a, .wav, .webm, .ogg vb.)");
       return;
     }
     setSesBlob(dosya);
@@ -207,7 +219,7 @@ export default function AnaSayfa() {
 
   const klasoreGonder = async () => {
     if (!sesBlob || !user) {
-      console.warn("Transfer iptal edildi: Ses verisi veya kullanıcı oturumu eksik.");
+      alert("Transfer edilecek ses verisi veya kullanıcı oturumu bulunamadı.");
       return;
     }
 
@@ -271,21 +283,29 @@ export default function AnaSayfa() {
         setSesUrl(null);
         setSesBlob(null);
         setSure(0);
+        if (fileInputRef.current) fileInputRef.current.value = "";
         await buluttanSesleriCek(user);
+        alert(`Ses kaydı başarıyla "${klasorEtiketi}" klasörüne transfer edildi!`);
       } catch (fsError: any) {
         console.error("❌ Firestore Yazma Hatası:", fsError);
+        alert("Ses Cloudinary'e yüklendi ancak Firestore veri tabanına kaydedilirken hata oluştu: " + (fsError.message || fsError));
       }
 
     } catch (error: any) {
       console.error("❌ Genel Transfer Hatası:", error);
+      alert("Dosya yükleme hatası: " + (error.message || "Yükleme sırasında beklenmeyen bir hata oluştu."));
     } finally {
       setTransferEdiliyor(false);
     }
   };
 
   const formatSure = (s: number) => {
-    const dk = Math.floor(s / 60);
+    const sa = Math.floor(s / 3600);
+    const dk = Math.floor((s % 3600) / 60);
     const sn = s % 60;
+    if (sa > 0) {
+      return `${sa}:${dk.toString().padStart(2, "0")}:${sn.toString().padStart(2, "0")}`;
+    }
     return `${dk}:${sn.toString().padStart(2, "0")}`;
   };
 
@@ -302,124 +322,32 @@ export default function AnaSayfa() {
   return (
     <div className="w-full min-h-screen bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 flex flex-col justify-start items-center p-4 sm:p-6 md:p-8 transition-colors duration-300">
       
-      {/* 📱 SADECE MOBİL: Sol taraftan açılan yan panel (Drawer Menu) */}
-      {menuAcik && (
-        <div className="block md:hidden fixed inset-0 z-50">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-            onClick={() => setMenuAcik(false)}
-          />
-          <div className="absolute left-0 top-0 h-full w-72 max-w-[85%] bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 shadow-2xl p-5 space-y-6 overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-neutral-400 dark:text-neutral-500 font-bold">{"[-]"}</span>
-                <h2 className="text-sm font-black tracking-tight text-neutral-900 dark:text-white">Ses Asistanı</h2>
-              </div>
-              <button
-                onClick={() => setMenuAcik(false)}
-                className="p-1.5 rounded-lg text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800 transition-colors"
-                aria-label="Menüyü Kapat"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 px-3 mb-2">Menü</p>
-              <nav className="space-y-1">
-                {/* 📩 GELEN KUTUSU EKLENDİ */}
-                <button
-                  onClick={() => { setMenuAcik(false); router.push("/gelen-kutusu"); }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
-                >
-                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                  </svg>
-                  Gelen Kutusu
-                </button>
-
-                <button
-                  onClick={() => { setMenuAcik(false); router.push("/toplantilar"); }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
-                >
-                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                  </svg>
-                  Toplantılar
-                </button>
-
-                <button
-                  onClick={() => { setMenuAcik(false); router.push("/ders-notlari"); }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
-                >
-                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
-                  </svg>
-                  Ders Notları
-                </button>
-
-                <button
-                  onClick={() => { setMenuAcik(false); router.push("/gunluk"); }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
-                >
-                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-                  </svg>
-                  Günlük
-                </button>
-
-                <button
-                  onClick={() => { setMenuAcik(false); router.push("/cop-kutusu"); }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
-                >
-                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                  </svg>
-                  Çöp Kutusu
-                </button>
-
-                <button
-                  onClick={() => { setMenuAcik(false); router.push("/profil"); }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-left"
-                >
-                  <svg className="w-4 h-4 shrink-0 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                  </svg>
-                  Profil
-                </button>
-              </nav>
-            </div>
-
-            {user?.email && (
-              <div className="pt-4 border-t border-neutral-100 dark:border-neutral-800">
-                <p className="text-[10px] font-bold text-neutral-400 truncate">Kullanıcı:</p>
-                <p className="text-xs font-bold text-neutral-700 dark:text-neutral-300 truncate">{user.email}</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       <div className="w-full max-w-4xl space-y-5 sm:space-y-6">
 
-        {/* 📱 SADECE MOBİL: Sol taraftaki paneli açan menü butonu (Mobil üst bilgi) */}
-        <div className="flex md:hidden items-center justify-between w-full mb-1">
-          <button
-            onClick={() => setMenuAcik(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl border border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-100 active:scale-95 transition-all dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-200 shadow-3xs"
-            aria-label="Menüyü Aç"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
-            </svg>
-            <span className="text-xs font-black tracking-wider uppercase">Menü</span>
-          </button>
-
-          <span className="text-xs font-black text-neutral-400 dark:text-neutral-500">
-            {"[-]"} Ses Asistanı
-          </span>
+        {/* 📱 SADECE MOBİL: Mobil Arama & Filtreleme Barı */}
+        <div className="flex md:hidden w-full flex-col gap-2">
+          <div className="w-full flex items-center gap-2 bg-white dark:bg-neutral-900 p-2 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xs">
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="Tüm klasörlerde ara..."
+                value={aramaKelimesi}
+                onChange={(e) => setAramaKelimesi(e.target.value)}
+                className="w-full pl-8 pr-3 py-2 text-xs font-bold text-neutral-900 bg-neutral-50 border border-neutral-100 dark:bg-neutral-800 dark:text-white dark:border-neutral-700 rounded-xl focus:outline-none placeholder-neutral-400"
+              />
+              <svg className="w-3.5 h-3.5 text-neutral-400 absolute left-2.5 top-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.603 10.602Z" />
+              </svg>
+            </div>
+            <select
+              value={siralamYonu}
+              onChange={(e) => setSiralamaYonu(e.target.value)}
+              className="px-2.5 py-2 text-xs font-black text-neutral-900 bg-white dark:bg-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:outline-none cursor-pointer"
+            >
+              <option value="yeni">Yeni</option>
+              <option value="eski">Eski</option>
+            </select>
+          </div>
         </div>
 
         {/* 💻 SADECE MASAÜSTÜ: Üst Header Bilgisi & Arama/Sıralama (Mobilde KESİNLİKLE GİZLİ) */}
@@ -526,21 +454,22 @@ export default function AnaSayfa() {
 
             <div>
               <input
+                id="ses-dosya-input"
                 type="file"
                 ref={fileInputRef}
                 onChange={dosyaYukle}
-                accept="audio/*"
+                accept="audio/*, .mp3, .m4a, .wav, .webm, .ogg, .aac, .flac, .mp4, .m4b, .wma, .amr, .opus"
                 className="hidden"
               />
-              <button
-                onClick={dosyaSeciminiTetikle}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border bg-neutral-50 border-neutral-200 text-neutral-800 hover:text-neutral-950 hover:border-neutral-950 hover:bg-white flex items-center justify-center transition-all shadow-2xs group hover:scale-110 active:scale-95 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:text-white"
-                title="Ses Dosyasi Yükle"
+              <label
+                htmlFor="ses-dosya-input"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border bg-neutral-50 border-neutral-200 text-neutral-800 hover:text-neutral-950 hover:border-neutral-950 hover:bg-white flex items-center justify-center transition-all shadow-2xs group hover:scale-110 active:scale-95 cursor-pointer dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-300 dark:hover:text-white"
+                title="Ses Dosyası Yükle"
               >
                 <svg className="w-6 h-6 sm:w-7 sm:h-7 transition-transform group-hover:scale-110 text-neutral-800 dark:text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-              </button>
+              </label>
             </div>
           </div>
 
