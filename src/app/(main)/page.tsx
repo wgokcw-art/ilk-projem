@@ -9,6 +9,58 @@ import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 const CLOUDINARY_CLOUD_NAME = "ng89mhgm";
 const CLOUDINARY_UPLOAD_PRESET = "ses_asistani";
 
+// ✂️ Web Audio API AudioBuffer -> WAV Blob Dönüştürücü Yardımcısı
+function bufferToWave(abuffer: AudioBuffer, len: number) {
+  let numOfChan = abuffer.numberOfChannels,
+    length = len * numOfChan * 2 + 44,
+    buffer = new ArrayBuffer(length),
+    view = new DataView(buffer),
+    channels = [], i, sample,
+    offset = 0,
+    pos = 0;
+
+  function setUint16(data: number) {
+    view.setUint16(pos, data, true);
+    pos += 2;
+  }
+
+  function setUint32(data: number) {
+    view.setUint32(pos, data, true);
+    pos += 4;
+  }
+
+  setUint32(0x46464952); // "RIFF"
+  setUint32(length - 8);
+  setUint32(0x45564157); // "WAVE"
+
+  setUint32(0x20746d66); // "fmt "
+  setUint32(16);
+  setUint16(1); // PCM
+  setUint16(numOfChan);
+  setUint32(abuffer.sampleRate);
+  setUint32(abuffer.sampleRate * 2 * numOfChan);
+  setUint16(numOfChan * 2);
+  setUint16(16);
+
+  setUint32(0x61746164); // "data"
+  setUint32(length - pos - 4);
+
+  for (i = 0; i < abuffer.numberOfChannels; i++)
+    channels.push(abuffer.getChannelData(i));
+
+  while (pos < length) {
+    for (i = 0; i < numOfChan; i++) {
+      sample = Math.max(-1, Math.min(1, channels[i][offset]));
+      sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+      view.setInt16(pos, sample, true);
+      pos += 2;
+    }
+    offset++;
+  }
+
+  return new Blob([buffer], { type: "audio/wav" });
+}
+
 export default function AnaSayfa() {
   const router = useRouter();
 
@@ -16,7 +68,7 @@ export default function AnaSayfa() {
   const [user, setUser] = useState<any>(null);
   const [yukleniyor, setYukleniyor] = useState(true);
 
-  // Orijinal State'ler (Aynen Korundu)
+  // Orijinal State'ler
   const [kaydediyor, setKaydediyor] = useState(false);
   const [sesUrl, setSesUrl] = useState<string | null>(null);
   const [sesBlob, setSesBlob] = useState<Blob | null>(null);
@@ -28,6 +80,24 @@ export default function AnaSayfa() {
   const [aramaKelimesi, setAramaKelimesi] = useState<string>("");
   const [siralamYonu, setSiralamaYonu] = useState<string>("yeni");
   const [tumKlasorSesleri, setTumKlasorSesleri] = useState<any[]>([]);
+
+  // 🚀 1. Canlı Konuşmayı Metne Dökme State'leri
+  const [canliMetin, setCanliMetin] = useState<string>("");
+  const recognitionRef = useRef<any>(null);
+
+  // 🚀 2. Zaman İşaretleyicileri State'leri
+  const [isaretler, setIsaretler] = useState<{ zaman: number; etiket: string }[]>([]);
+
+  // 🚀 3. Oynatma Hızı State'i
+  const [oynatmaHizi, setOynatmaHizi] = useState<number>(1.0);
+  const mainAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // 🚀 4. Ses Kırpma Modal State'leri
+  const [trimmerAcik, setTrimmerAcik] = useState(false);
+  const [baslangicSaniye, setBaslangicSaniye] = useState<number>(0);
+  const [bitisSaniye, setBitisSaniye] = useState<number>(0);
+  const [toplamSaniyeLimit, setToplamSaniyeLimit] = useState<number>(0);
+  const [kirpiliyor, setKirpiliyor] = useState(false);
 
   const [sesSeviyeleri, setSesSeviyeleri] = useState<number[]>([10, 10, 10, 10, 10, 10, 10, 10, 10]);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -81,6 +151,7 @@ export default function AnaSayfa() {
       if (audioContextRef.current && audioContextRef.current.state !== "closed") {
         audioContextRef.current.close().catch((err) => console.log(err));
       }
+      if (recognitionRef.current) recognitionRef.current.stop();
     };
   }, [user]);
 
@@ -113,6 +184,8 @@ export default function AnaSayfa() {
     setSure(0);
     setSesUrl(null);
     setSesBlob(null);
+    setCanliMetin("");
+    setIsaretler([]);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -134,7 +207,7 @@ export default function AnaSayfa() {
 
       const mediaRecorder = new MediaRecorder(stream, {
         ...(recorderMimeType ? { mimeType: recorderMimeType } : {}),
-        audioBitsPerSecond: 64000, // 64 kbps stüdyo netliği - 10 dakikalık kayıt sadece ~4.5 MB olur!
+        audioBitsPerSecond: 64000,
       });
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.ondataavailable = (e) => {
@@ -154,7 +227,33 @@ export default function AnaSayfa() {
         if (audioContextRef.current && audioContextRef.current.state !== "closed") {
           audioContextRef.current.close().catch((err) => console.log(err));
         }
+
+        if (recognitionRef.current) {
+          try { recognitionRef.current.stop(); } catch (e) {}
+        }
       };
+
+      // 🚀 Canlı Speech-to-Text (STT) Başlat
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        try {
+          const rec = new SpeechRecognition();
+          rec.continuous = true;
+          rec.interimResults = true;
+          rec.lang = "tr-TR";
+          rec.onresult = (event: any) => {
+            let metin = "";
+            for (let i = 0; i < event.results.length; i++) {
+              metin += event.results[i][0].transcript;
+            }
+            setCanliMetin(metin);
+          };
+          rec.start();
+          recognitionRef.current = rec;
+        } catch (e) {
+          console.log("Speech recognition başlatılamadı:", e);
+        }
+      }
 
       mediaRecorder.start(10);
       setKaydediyor(true);
@@ -171,8 +270,98 @@ export default function AnaSayfa() {
     }
   };
 
-  const dosyaSeciminiTetikle = () => {
-    if (fileInputRef.current) fileInputRef.current.click();
+  // 🚀 Zaman İşaretleyicisi Ekle
+  const isaretEkle = () => {
+    const etiketGirdisi = prompt(`📌 ${formatSure(sure)} anına bir etiket/not yazın:`, `İşaret (${formatSure(sure)})`);
+    if (etiketGirdisi !== null) {
+      const yeniIsaret = {
+        zaman: sure,
+        etiket: etiketGirdisi.trim() || `İşaret (${formatSure(sure)})`
+      };
+      setIsaretler((prev) => [...prev, yeniIsaret]);
+    }
+  };
+
+  const isareteAtla = (saniye: number) => {
+    if (mainAudioRef.current) {
+      mainAudioRef.current.currentTime = saniye;
+      mainAudioRef.current.play().catch(() => {});
+    }
+  };
+
+  // 🚀 Oynatma Hızı Değiştirici
+  const hizDegistir = (hiz: number) => {
+    setOynatmaHizi(hiz);
+    if (mainAudioRef.current) {
+      mainAudioRef.current.playbackRate = hiz;
+    }
+  };
+
+  // 🚀 Ses Kırpma Modalını Aç
+  const trimmerAc = () => {
+    if (!sesBlob && !sesUrl) return;
+    setBaslangicSaniye(0);
+    setBitisSaniye(sure > 0 ? sure : 60);
+    setToplamSaniyeLimit(sure > 0 ? sure : 120);
+    setTrimmerAcik(true);
+  };
+
+  // 🚀 Web Audio API İle Sesi İstenen Saniyeler Arasında Kırp
+  const sesKirpVeKaydet = async () => {
+    if (!sesBlob) {
+      alert("Kırpılacak ses verisi bulunamadı!");
+      return;
+    }
+    if (baslangicSaniye >= bitisSaniye) {
+      alert("Başlangıç zamanı bitiş zamanından önce olmalıdır!");
+      return;
+    }
+
+    setKirpiliyor(true);
+    try {
+      const arrayBuffer = await sesBlob.arrayBuffer();
+      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      const audioCtx = new AudioCtxClass();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+      const sampleRate = audioBuffer.sampleRate;
+      const startOffset = Math.floor(baslangicSaniye * sampleRate);
+      const endOffset = Math.floor(bitisSaniye * sampleRate);
+      const frameCount = Math.max(1, endOffset - startOffset);
+
+      const trimmedBuffer = audioCtx.createBuffer(
+        audioBuffer.numberOfChannels,
+        frameCount,
+        sampleRate
+      );
+
+      for (let c = 0; c < audioBuffer.numberOfChannels; c++) {
+        const channelData = audioBuffer.getChannelData(c);
+        const trimmedData = trimmedBuffer.getChannelData(c);
+        for (let i = 0; i < frameCount; i++) {
+          if (startOffset + i < channelData.length) {
+            trimmedData[i] = channelData[startOffset + i];
+          }
+        }
+      }
+
+      const waveBlob = bufferToWave(trimmedBuffer, frameCount);
+      setSesBlob(waveBlob);
+      const yeniUrl = URL.createObjectURL(waveBlob);
+      setSesUrl(yeniUrl);
+
+      const yeniSure = Math.round(bitisSaniye - baslangicSaniye);
+      setSure(yeniSure);
+      setTrimmerAcik(false);
+      alert(`Ses başarıyla kırpıldı! Yeni süre: ${formatSure(yeniSure)}`);
+
+      if (audioCtx.state !== "closed") audioCtx.close();
+    } catch (error: any) {
+      console.error("Ses kırpma hatası:", error);
+      alert("Ses kırpılırken hata oluştu: " + (error.message || error));
+    } finally {
+      setKirpiliyor(false);
+    }
   };
 
   const dosyaYukle = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,6 +380,8 @@ export default function AnaSayfa() {
     const oUrl = URL.createObjectURL(dosya);
     setSesUrl(oUrl);
     setSure(0);
+    setCanliMetin("");
+    setIsaretler([]);
   };
 
   const dosyayiAc = (ses: any) => {
@@ -275,6 +466,8 @@ export default function AnaSayfa() {
         tarih: "Bugün, " + bugun.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         sure: sure > 0 ? `${Math.floor(sure / 60)}:${(sure % 60).toString().padStart(2, "0")}` : "Hazir Dosya",
         bulunduguKlasor: klasorEtiketi, 
+        canliMetin: canliMetin || "",
+        isaretler: isaretler || [],
         olusturmaZamani: Date.now(),
       };
 
@@ -283,6 +476,8 @@ export default function AnaSayfa() {
         setSesUrl(null);
         setSesBlob(null);
         setSure(0);
+        setCanliMetin("");
+        setIsaretler([]);
         if (fileInputRef.current) fileInputRef.current.value = "";
         await buluttanSesleriCek(user);
         alert(`Ses kaydı başarıyla "${klasorEtiketi}" klasörüne transfer edildi!`);
@@ -324,7 +519,7 @@ export default function AnaSayfa() {
       
       <div className="w-full max-w-4xl space-y-5 sm:space-y-6">
 
-        {/* 🎙️ ANA SAYFA BÖLÜM BAŞLIĞI (Hem Mobilde Hem Masaüstünde Görünür) */}
+        {/* 🎙️ ANA SAYFA BÖLÜM BAŞLIĞI */}
         <div className="w-full border-b border-neutral-200 dark:border-neutral-800 pb-5 pt-2 sm:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <p className="text-xs sm:text-sm font-bold text-neutral-500 dark:text-neutral-400">
@@ -380,7 +575,6 @@ export default function AnaSayfa() {
                     key={ses.id}
                     onClick={() => dosyayiAc(ses)}
                     className="bg-white border border-neutral-200 rounded-xl p-3 flex items-center justify-between gap-4 shadow-3xs cursor-pointer hover:bg-neutral-100 dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700 transition-all duration-200 active:scale-[0.99]"
-                    title="Dosyayi ilgili klasör sayfasinda acmak icin tiklayin"
                   >
                     <div>
                       <h4 className="font-bold text-xs">{ses.ad}</h4>
@@ -412,18 +606,28 @@ export default function AnaSayfa() {
                 ) : (
                   <>
                     <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white block dark:hidden" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 0 3-3v-6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 0 3-3v-6a3 3 0 0 0 3 3Z" />
                     </svg>
                     <svg className="w-6 h-6 sm:w-7 sm:h-7 text-neutral-950 hidden dark:block" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 0 3-3v-6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 0 3-3v-6a3 3 0 0 0 3 3Z" />
                     </svg>
                   </>
                 )}
               </button>
               {kaydediyor && (
-                <span className="text-[10px] sm:text-xs font-black px-2 py-1 sm:px-3 bg-red-50 text-red-600 border border-red-100 rounded-full animate-pulse absolute left-2 sm:left-4 md:left-8 dark:bg-red-950/50 dark:text-red-400 dark:border-red-900">
-                  {formatSure(sure)}
-                </span>
+                <div className="flex flex-col gap-1 items-start">
+                  <span className="text-[10px] sm:text-xs font-black px-2 py-1 sm:px-3 bg-red-50 text-red-600 border border-red-100 rounded-full animate-pulse dark:bg-red-950/50 dark:text-red-400 dark:border-red-900">
+                    {formatSure(sure)}
+                  </span>
+                  
+                  {/* 🚀 2. ZAMAN İŞARETLEYİCİSİ BUTONU */}
+                  <button
+                    onClick={isaretEkle}
+                    className="px-2.5 py-1 rounded-full bg-amber-500 text-neutral-950 text-[10px] font-black hover:bg-amber-400 active:scale-95 transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>📌</span> İşaret Ekle
+                  </button>
+                </div>
               )}
             </div>
 
@@ -472,6 +676,24 @@ export default function AnaSayfa() {
             })}
           </div>
 
+          {/* 🚀 1. CANLI SPEECH-TO-TEXT (STT) CANLI METİN AKIŞI KUTUSU */}
+          {kaydediyor && (
+            <div className="w-full p-4 rounded-2xl bg-neutral-900 text-white dark:bg-neutral-950 border border-neutral-800 shadow-xl space-y-1.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">
+                    Canlı Konuşma Metni (STT)
+                  </span>
+                </div>
+                <span className="text-[9px] font-bold text-neutral-400">Türkçe Yapay Zeka</span>
+              </div>
+              <p className="text-xs font-semibold text-neutral-200 leading-relaxed max-h-24 overflow-y-auto italic">
+                {canliMetin || "Konuşmaya başladığınızda kelimeler burada canlı aksın..."}
+              </p>
+            </div>
+          )}
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-black uppercase tracking-widest flex items-center gap-1">
@@ -479,18 +701,73 @@ export default function AnaSayfa() {
               </h3>
               {sesUrl && (
                 <span className="text-[10px] font-black text-neutral-900 bg-neutral-200 px-2.5 py-0.5 rounded-full border border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-700">
-                  Ses Verisi Yüklendi
+                  Ses Verisi Hazır
                 </span>
               )}
             </div>
 
             {sesUrl ? (
-              <div className="p-4 sm:p-5 bg-neutral-50 border border-neutral-200 rounded-2xl flex flex-col lg:flex-row items-center gap-4 justify-between shadow-3xs dark:bg-neutral-950 dark:border-neutral-800">
-                <div className="w-full lg:max-w-xs">
-                  <audio controls className="w-full h-8 accent-neutral-950" src={sesUrl} key={sesUrl} />
+              <div className="p-4 sm:p-5 bg-neutral-50 border border-neutral-200 rounded-2xl flex flex-col gap-4 shadow-3xs dark:bg-neutral-950 dark:border-neutral-800">
+                
+                {/* OYNATICI VE KONTROLLER */}
+                <div className="w-full flex flex-col sm:flex-row items-center gap-3 justify-between">
+                  <audio 
+                    ref={mainAudioRef}
+                    controls 
+                    className="w-full accent-neutral-950" 
+                    src={sesUrl} 
+                    key={sesUrl} 
+                  />
+
+                  {/* 🚀 3. OYNATMA HIZI KONTROLÜ */}
+                  <div className="flex items-center gap-1 bg-white dark:bg-neutral-900 p-1 rounded-xl border border-neutral-200 dark:border-neutral-800 shadow-2xs">
+                    <span className="text-[9px] font-black uppercase px-1.5 text-neutral-400">Hız:</span>
+                    {[0.75, 1.0, 1.25, 1.5, 2.0].map((hiz) => (
+                      <button
+                        key={hiz}
+                        onClick={() => hizDegistir(hiz)}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+                          oynatmaHizi === hiz
+                            ? "bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 shadow-xs"
+                            : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                        }`}
+                      >
+                        {hiz}x
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* 🚀 4. SES KIRP BUTONU */}
+                  <button
+                    onClick={trimmerAc}
+                    className="px-3 py-2 bg-neutral-200 text-neutral-900 dark:bg-neutral-800 dark:text-white rounded-xl text-xs font-black hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                  >
+                    <span>✂️</span> Sesi Kırp
+                  </button>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center gap-2 w-full lg:w-auto justify-end">
+                {/* 🚀 ZAMAN İŞARETLEYİCİLERİ LİSTESİ */}
+                {isaretler.length > 0 && (
+                  <div className="w-full pt-2 border-t border-neutral-200 dark:border-neutral-800 space-y-1.5">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-neutral-400">📌 Kaydedilmiş İşaretleyiciler:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {isaretler.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => isareteAtla(item.zaman)}
+                          className="px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold hover:bg-amber-500/20 active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>📌</span>
+                          <span className="font-black">{formatSure(item.zaman)}</span>
+                          <span>- {item.etiket}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* KLASÖR SEÇİMİ VE BULUTA YÜKLE */}
+                <div className="flex flex-col sm:flex-row items-center gap-2 w-full justify-end pt-2 border-t border-neutral-200 dark:border-neutral-800">
                   <select
                     value={seciliKlasor}
                     onChange={(e) => setSeciliKlasor(e.target.value)}
@@ -525,6 +802,90 @@ export default function AnaSayfa() {
         </div>
 
       </div>
+
+      {/* ✂️ 4. SES KIRPMA MODALI (AUDIO TRIMMER MODAL) */}
+      {trimmerAcik && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/70 backdrop-blur-md animate-fadeIn">
+          <div className="w-full max-w-md bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-3xl p-6 shadow-2xl space-y-6">
+            
+            <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+              <h3 className="text-base font-black flex items-center gap-2 text-neutral-900 dark:text-white">
+                <span>✂️</span> Ses Kırpma Aracı
+              </h3>
+              <button 
+                onClick={() => setTrimmerAcik(false)}
+                className="p-1 rounded-xl text-neutral-400 hover:text-neutral-800 dark:hover:text-white transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 leading-relaxed">
+              Ses kaydınızın tutmak istediğiniz başlangıç ve bitiş saniyelerini seçin:
+            </p>
+
+            <div className="space-y-4">
+              {/* BAŞLANGIÇ SANİYE */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-bold">
+                  <span>Başlangıç Zamanı:</span>
+                  <span className="font-mono text-indigo-600 dark:text-indigo-400">{formatSure(baslangicSaniye)}</span>
+                </div>
+                <input 
+                  type="range" 
+                  min={0} 
+                  max={Math.max(1, bitisSaniye - 1)} 
+                  value={baslangicSaniye} 
+                  onChange={(e) => setBaslangicSaniye(Number(e.target.value))}
+                  className="w-full accent-neutral-950 dark:accent-white cursor-pointer"
+                />
+              </div>
+
+              {/* BİTİŞ SANİYE */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs font-bold">
+                  <span>Bitiş Zamanı:</span>
+                  <span className="font-mono text-indigo-600 dark:text-indigo-400">{formatSure(bitisSaniye)}</span>
+                </div>
+                <input 
+                  type="range" 
+                  min={Math.min(baslangicSaniye + 1, toplamSaniyeLimit)} 
+                  max={toplamSaniyeLimit || 60} 
+                  value={bitisSaniye} 
+                  onChange={(e) => setBitisSaniye(Number(e.target.value))}
+                  className="w-full accent-neutral-950 dark:accent-white cursor-pointer"
+                />
+              </div>
+
+              {/* ÖZET KUTUSU */}
+              <div className="p-3 rounded-2xl bg-neutral-100 dark:bg-neutral-800 text-center text-xs font-bold">
+                Kırpılacak Yeni Süre: <span className="text-emerald-600 dark:text-emerald-400 font-mono font-black">{formatSure(Math.max(0, bitisSaniye - baslangicSaniye))}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setTrimmerAcik(false)}
+                className="w-1/2 py-3 rounded-xl border border-neutral-200 dark:border-neutral-700 text-xs font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+              >
+                Vazgeç
+              </button>
+
+              <button
+                type="button"
+                onClick={sesKirpVeKaydet}
+                disabled={kirpiliyor}
+                className="w-1/2 py-3 rounded-xl bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 text-xs font-black hover:opacity-90 active:scale-95 transition-all shadow-md disabled:opacity-50"
+              >
+                {kirpiliyor ? "Kırpılıyor..." : "✂️ Kırp ve Kaydet"}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
