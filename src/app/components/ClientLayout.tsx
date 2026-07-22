@@ -166,21 +166,46 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         </div>
       </header>
 
-      {/* 📱 MOBİL: ÜSTTE HİÇBİR HEADER BAR YOKTUR! Sadece Sol Üstte Yüzen (Floating) Menü Butonu Vardır */}
-      <div className="block md:hidden fixed top-3 left-3 z-40">
-        <button
-          onClick={() => setMenuAcik(true)}
-          className="p-2.5 rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-md text-neutral-900 dark:text-white shadow-lg active:scale-95 transition-all flex items-center gap-2"
-          aria-label="Menüyü Aç"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
-          </svg>
-          <span className="text-xs font-black">Klasörler</span>
-        </button>
-      </div>
+      {/* 📱 MOBİL HEADER: Üstte SES ASİSTANI yazısı ve Klasörler Butonu */}
+      <header className="block md:hidden sticky top-0 z-40 w-full bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 shadow-3xs">
+        <div className="flex items-center justify-between">
+          {/* Sol Taraf: Yan Menü Butonu */}
+          <button
+            onClick={() => setMenuAcik(true)}
+            className="px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 active:scale-95 transition-all flex items-center gap-2"
+            aria-label="Klasörler Menüsünü Aç"
+          >
+            <svg className="w-4 h-4 text-neutral-600 dark:text-neutral-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+            </svg>
+            <span className="text-xs font-black tracking-wide">Klasörler</span>
+          </button>
 
-      {/* 📱 MOBİL YAN AÇILIR PANEL (DRAWER MENU) */}
+          {/* Orta Taraf: MOBİLDE EKRANIN ÜSTÜNDE YAZAN "SES ASİSTANI" BAŞLIĞI */}
+          <div
+            onClick={() => router.push("/")}
+            className="flex items-center gap-2 cursor-pointer select-none"
+          >
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center font-black text-xs bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 shadow-xs">
+              S
+            </div>
+            <h1 className="font-black text-sm tracking-tight text-neutral-900 dark:text-white">
+              Ses Asistanı
+            </h1>
+          </div>
+
+          {/* Sağ Taraf: Tema Butonu */}
+          <button
+            onClick={temaDegistir}
+            className="p-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-xs font-bold active:scale-95 transition-all"
+            aria-label="Tema Değiştir"
+          >
+            {karanlikMod ? "☀️" : "🌙"}
+          </button>
+        </div>
+      </header>
+
+      {/* 📱 MOBİL YAN AÇILIR PANEL (DRAWER MENU) - BURADA SES ASİSTANI YAZISIZ, SADECE MENÜ LİSTESİ */}
       {menuAcik && (
         <div className="block md:hidden fixed inset-0 z-50">
           {/* Arka Plan Karartma & Blur */}
@@ -192,22 +217,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           {/* Sol Panel Gövdesi */}
           <div className="absolute left-0 top-0 h-full w-80 max-w-[85vw] bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 shadow-2xl flex flex-col justify-between p-5 overflow-y-auto">
             
-            <div className="space-y-6">
-              {/* Panel Üst Başlık & Kapat Butonu */}
-              <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 shadow-sm">
-                    K
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-black text-neutral-900 dark:text-white">Klasörler & Menü</h2>
-                    <p className="text-[10px] font-bold text-neutral-400">Gezinti Listesi</p>
-                  </div>
-                </div>
+            <div className="space-y-5">
+              {/* Panel Üstü: Sadece Temiz Kapat Butonu & Menü Etiketi (Ses Asistanı yazısı burada KESİNLİKLE YOK!) */}
+              <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
+                <span className="text-xs font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
+                  📁 Klasör Seçimi
+                </span>
                 
                 <button
                   onClick={() => setMenuAcik(false)}
-                  className="p-2 rounded-xl text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                  className="p-1.5 rounded-xl text-neutral-400 hover:text-neutral-800 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                   aria-label="Menüyü Kapat"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -217,36 +236,31 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               </div>
 
               {/* Klasörler ve Sayfa Linkleri Listesi */}
-              <div className="space-y-2">
-                <p className="text-[10px] font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 px-3">
-                  Tüm Klasörler
-                </p>
-                <nav className="space-y-1.5">
-                  {navItemlar.map((item) => {
-                    const isActive = pathname === item.yol;
+              <nav className="space-y-1.5">
+                {navItemlar.map((item) => {
+                  const isActive = pathname === item.yol;
 
-                    return (
-                      <button
-                        key={item.yol}
-                        onClick={() => {
-                          setMenuAcik(false);
-                          router.push(item.yol);
-                        }}
-                        className={`w-full flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
-                          isActive
-                            ? "bg-neutral-950 text-white shadow-md dark:bg-white dark:text-neutral-950"
-                            : "text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                        }`}
-                      >
-                        <span className={isActive ? "text-white dark:text-neutral-950" : "text-neutral-400 dark:text-neutral-500"}>
-                          {item.icon}
-                        </span>
-                        <span className="font-black tracking-tight">{item.ad}</span>
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
+                  return (
+                    <button
+                      key={item.yol}
+                      onClick={() => {
+                        setMenuAcik(false);
+                        router.push(item.yol);
+                      }}
+                      className={`w-full flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all text-left ${
+                        isActive
+                          ? "bg-neutral-950 text-white shadow-md dark:bg-white dark:text-neutral-950"
+                          : "text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                      }`}
+                    >
+                      <span className={isActive ? "text-white dark:text-neutral-950" : "text-neutral-400 dark:text-neutral-500"}>
+                        {item.icon}
+                      </span>
+                      <span className="font-black tracking-tight">{item.ad}</span>
+                    </button>
+                  );
+                })}
+              </nav>
             </div>
 
             {/* Alt Kısım: Kullanıcı ve Tema Bilgisi */}
@@ -273,7 +287,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       )}
 
       {/* Sayfa İçerikleri */}
-      <main className="w-full flex-1 bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100 pt-12 md:pt-0">
+      <main className="w-full flex-1 bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
         {children}
       </main>
     </div>
