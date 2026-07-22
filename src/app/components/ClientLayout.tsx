@@ -169,16 +169,15 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       {/* 📱 MOBİL HEADER: Üstte SES ASİSTANI yazısı ve Klasörler Butonu */}
       <header className="block md:hidden sticky top-0 z-40 w-full bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md border-b border-neutral-200 dark:border-neutral-800 px-4 py-3 shadow-3xs">
         <div className="flex items-center justify-between">
-          {/* Sol Taraf: Yan Menü Butonu */}
+          {/* Sol Taraf: Yan Menü Butonu (Sadece 3 Çizgi) */}
           <button
             onClick={() => setMenuAcik(true)}
-            className="px-3 py-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 active:scale-95 transition-all flex items-center gap-2"
-            aria-label="Klasörler Menüsünü Aç"
+            className="p-2.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 active:scale-95 transition-all flex items-center justify-center"
+            aria-label="Menüyü Aç"
           >
-            <svg className="w-4 h-4 text-neutral-600 dark:text-neutral-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-neutral-800 dark:text-neutral-200" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
             </svg>
-            <span className="text-xs font-black tracking-wide">Klasörler</span>
           </button>
 
           {/* Orta Taraf: MOBİLDE EKRANIN ÜSTÜNDE YAZAN "SES ASİSTANI" BAŞLIĞI */}
