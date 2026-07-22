@@ -268,7 +268,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 <div>
                   <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Oturum Açan:</p>
                   <p className="text-xs font-black text-neutral-800 dark:text-neutral-200 truncate max-w-[180px]">
-                    {kullanici?.email || "Kullanıcı"}
+                    {kullanici?.displayName || kullanici?.email?.split('@')[0] || "Kullanıcı"}
                   </p>
                 </div>
 

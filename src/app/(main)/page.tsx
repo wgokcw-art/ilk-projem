@@ -328,7 +328,7 @@ export default function AnaSayfa() {
         <div className="w-full border-b border-neutral-200 dark:border-neutral-800 pb-5 pt-2 sm:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <p className="text-xs sm:text-sm font-bold text-neutral-500 dark:text-neutral-400">
-              👋 Hoş geldin, <span className="text-neutral-900 dark:text-neutral-100">{user?.email}</span>
+              👋 Hoş geldin, <span className="text-neutral-900 dark:text-neutral-100">{user?.displayName || user?.email?.split("@")[0] || "Kullanıcı"}</span>
             </p>
             <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-2 tracking-tight text-neutral-900 dark:text-white">
               <span className="text-neutral-400 dark:text-neutral-500 text-xl">{"[-]"}</span> Ses Asistanı
