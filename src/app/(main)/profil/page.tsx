@@ -151,7 +151,7 @@ export default function ProfilSayfasi() {
             <div className="space-y-1">
               <h2 className="text-xl font-black tracking-tight">{isim}</h2>
               <p className="text-xs text-neutral-400 font-bold uppercase tracking-wider">{unvan}</p>
-              <p className="text-xs text-neutral-500 font-medium">{user?.email}</p>
+              <p className="text-xs text-neutral-500 font-medium">{user?.displayName || user?.email?.split("@")[0] || "Kullanıcı"}</p>
             </div>
 
             <button
