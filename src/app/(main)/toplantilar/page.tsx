@@ -8,6 +8,7 @@ import { collection, query, where, getDocs, doc, updateDoc } from "firebase/fire
 import PaylasimBar from "../../components/PaylasimBar";
 import InteraktifTranskript from "../../components/InteraktifTranskript";
 import TakvimHatirlaticiModal from "../../components/TakvimHatirlaticiModal";
+import DilCeviriBar from "../../components/DilCeviriBar";
 
 export default function Toplantilar() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function Toplantilar() {
   const [isleniyor, setIsleniyor] = useState<string | null>(null);
   const [analizDurumu, setAnalizDurumu] = useState<string>(" ");
   const [seciliRapor, setSeciliRapor] = useState<any | null>(null);
+  const [orijinalRapor, setOrijinalRapor] = useState<any | null>(null);
   const [seciliSes, setSeciliSes] = useState<any | null>(null);
   const [mevcutZaman, setMevcutZaman] = useState<number>(0);
   const [seciliTakvimGorev, setSeciliTakvimGorev] = useState<string | null>(null);
@@ -139,7 +141,7 @@ export default function Toplantilar() {
 
       const veri = await apiResponse.json();
 
-      setSeciliRapor({
+      const raporObj = {
         sesAdi: sesNesnesi.ad,
         sureBilgisi: `Tamamlandı (${sesNesnesi.sure || "Hazır Dosya"})`,
         isSessiz: false,
@@ -147,9 +149,13 @@ export default function Toplantilar() {
         kritikYerler: veri.kritikler || veri.kritikYerler || [],
         actionItems: veri.actionItems || [],
         speakers: veri.speakers || [],
+        transkriptZamanli: veri.transkriptZamanli || [],
         sentiment: veri.sentiment || "Olumlu / Profesyonel",
         tone: veri.tone || "Yapıcı ve Kararlı"
-      });
+      };
+
+      setSeciliRapor(raporObj);
+      setOrijinalRapor(raporObj);
 
     } catch (error: any) {
       console.error("Yapay zeka entegrasyon hatası:", error);
@@ -308,6 +314,12 @@ export default function Toplantilar() {
                       </span>
                     </div>
                   </div>
+
+                  {/* 🌐 4. TEK TIKLA ÇOKLU DİL ÇEVİRİSİ BARI */}
+                  <DilCeviriBar 
+                    orijinalRapor={orijinalRapor || seciliRapor} 
+                    onRaporGuncelle={(yeniRapor) => setSeciliRapor(yeniRapor)} 
+                  />
 
                   {/* 📤 3. DIŞA AKTARMA VE PAYLAŞIM BARI */}
                   <PaylasimBar rapor={seciliRapor} klasorAdi="Toplantılar" />
