@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "../../../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
-import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
 import VisualCalendar, { TakvimEtkinlik } from "../../components/VisualCalendar";
 import TakvimHatirlaticiModal from "../../components/TakvimHatirlaticiModal";
 
@@ -117,6 +117,20 @@ export default function TakvimSayfasi() {
     }
   };
 
+  // Etkinlik Silme
+  const etkinlikSil = async (id: string) => {
+    try {
+      // Eğer id tire içeriyorsa ses kaydı AI görevidir, yoksa Firestore hatirlaticisidir
+      if (!id.includes("-")) {
+        await deleteDoc(doc(db, "hatirlaticilar", id));
+      }
+    } catch (err) {
+      console.error("Hatırlatıcı silinirken hata:", err);
+    }
+    // Anında ekrandan ve takvim rozetlerinden kaldır
+    setEtkinlikler((prev) => prev.filter((item) => item.id !== id));
+  };
+
   if (yukleniyor || !istemciHazir) return null;
 
   return (
@@ -143,6 +157,7 @@ export default function TakvimSayfasi() {
           etkinlikler={etkinlikler}
           onEtkinlikEkle={ozelEtkinlikEkle}
           onTakvimeAktar={(etkinlik) => setSeciliTakvimGorev(etkinlik.baslik)}
+          onEtkinlikSil={etkinlikSil}
         />
 
       </div>
