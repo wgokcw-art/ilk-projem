@@ -7,6 +7,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
 import PaylasimBar from "../../components/PaylasimBar";
 import InteraktifTranskript from "../../components/InteraktifTranskript";
+import TakvimHatirlaticiModal from "../../components/TakvimHatirlaticiModal";
 
 export default function Toplantilar() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function Toplantilar() {
   const [seciliRapor, setSeciliRapor] = useState<any | null>(null);
   const [seciliSes, setSeciliSes] = useState<any | null>(null);
   const [mevcutZaman, setMevcutZaman] = useState<number>(0);
+  const [seciliTakvimGorev, setSeciliTakvimGorev] = useState<string | null>(null);
   const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({});
 
   const [istemciHazir, setIstemciHazir] = useState(false);
@@ -352,22 +354,40 @@ export default function Toplantilar() {
                         {seciliRapor.actionItems.map((gorev: string, idx: number) => {
                           const isChecked = !!tamamlananGorevler[idx];
                           return (
-                            <label 
+                            <div 
                               key={idx} 
-                              className={`flex items-start gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${
+                              className={`flex items-center justify-between gap-2.5 p-2.5 rounded-xl border transition-all ${
                                 isChecked 
                                   ? "bg-neutral-100 border-neutral-300 text-neutral-500 line-through dark:bg-neutral-900 dark:border-neutral-700 opacity-60" 
                                   : "bg-white border-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-200"
                               }`}
                             >
-                              <input 
-                                type="checkbox" 
-                                checked={isChecked} 
-                                onChange={() => setTamamlananGorevler(p => ({ ...p, [idx]: !p[idx] }))}
-                                className="mt-0.5 accent-neutral-950 dark:accent-white rounded cursor-pointer"
-                              />
-                              <span className="text-xs font-bold leading-tight">{gorev}</span>
-                            </label>
+                              <label className="flex items-start gap-2.5 flex-1 cursor-pointer">
+                                <input 
+                                  type="checkbox" 
+                                  checked={isChecked} 
+                                  onChange={() => setTamamlananGorevler(p => ({ ...p, [idx]: !p[idx] }))}
+                                  className="mt-0.5 accent-neutral-950 dark:accent-white rounded cursor-pointer"
+                                />
+                                <span className="text-xs font-bold leading-tight">{gorev}</span>
+                              </label>
+
+                              {/* Takvim / Hatırlatıcı Ekle Butonu */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSeciliTakvimGorev(gorev);
+                                }}
+                                className="p-1.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-all active:scale-95 text-[10px] font-black flex items-center gap-1 shrink-0"
+                                title="Takvim & Hatırlatıcı Ekle"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                                </svg>
+                                <span>Takvim</span>
+                              </button>
+                            </div>
                           );
                         })}
                       </div>
@@ -471,6 +491,14 @@ export default function Toplantilar() {
           </div>
         )}
       </div>
+
+      {/* 📅 TAKVİM & HATIRLATICI MODALI */}
+      {seciliTakvimGorev && (
+        <TakvimHatirlaticiModal
+          gorevBasligi={seciliTakvimGorev}
+          onClose={() => setSeciliTakvimGorev(null)}
+        />
+      )}
     </div>
   );
 }
