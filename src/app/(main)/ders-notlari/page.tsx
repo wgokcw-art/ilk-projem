@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "../../../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import PaylasimBar from "../../components/PaylasimBar";
 
 export default function DersNotlari() {
   const router = useRouter();
@@ -276,6 +277,9 @@ export default function DersNotlari() {
                       </span>
                     </div>
                   </div>
+
+                  {/* 📤 3. DIŞA AKTARMA VE PAYLAŞIM BARI */}
+                  <PaylasimBar rapor={seciliRapor} klasorAdi="Ders Notları" />
 
                   {/* Özet */}
                   <p className="text-xs font-medium leading-relaxed p-3.5 rounded-2xl bg-neutral-50 text-neutral-800 border border-neutral-100 dark:bg-neutral-950 dark:text-neutral-200 dark:border-neutral-800">

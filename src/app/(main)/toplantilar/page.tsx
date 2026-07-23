@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "../../../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import PaylasimBar from "../../components/PaylasimBar";
 
 export default function Toplantilar() {
   const router = useRouter();
@@ -291,6 +292,9 @@ export default function Toplantilar() {
                       </span>
                     </div>
                   </div>
+
+                  {/* 📤 3. DIŞA AKTARMA VE PAYLAŞIM BARI */}
+                  <PaylasimBar rapor={seciliRapor} klasorAdi="Toplantılar" />
 
                   {/* Özet */}
                   <div className="space-y-1">
