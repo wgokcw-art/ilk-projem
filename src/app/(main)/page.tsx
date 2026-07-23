@@ -7,6 +7,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 import IstatistikPaneli from "../components/IstatistikPaneli";
 import InteraktifTranskript from "../components/InteraktifTranskript";
+import AudioVisualizer from "../components/AudioVisualizer";
 
 const CLOUDINARY_CLOUD_NAME = "ng89mhgm";
 const CLOUDINARY_UPLOAD_PRESET = "ses_asistani";
@@ -745,6 +746,14 @@ export default function AnaSayfa() {
             {sesUrl ? (
               <div className="p-4 sm:p-5 bg-neutral-50 border border-neutral-200 rounded-2xl flex flex-col gap-4 shadow-3xs dark:bg-neutral-950 dark:border-neutral-800">
                 
+                {/* 🌊 24 BARLI CANLI SES FREKANS EKOLAYZIRI SPEKTRUMU */}
+                <div className="w-full flex items-center justify-between gap-3 p-2 bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-neutral-400 pl-2">
+                    Canlı Ses Spektrumu
+                  </span>
+                  <AudioVisualizer isPlaying={kaydediyor || mevcutZaman > 0} barCount={24} height={28} />
+                </div>
+
                 {/* OYNATICI VE KONTROLLER */}
                 <div className="w-full flex flex-col sm:flex-row items-center gap-3 justify-between">
                   <audio 

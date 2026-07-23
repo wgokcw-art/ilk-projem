@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import AudioVisualizer from "./AudioVisualizer";
 
 export interface TranskriptSatiri {
   zaman: number; // saniye cinsinden
@@ -88,6 +89,14 @@ export default function InteraktifTranskript({
             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.603 10.602Z" />
           </svg>
         </div>
+      </div>
+
+      {/* 🌊 24 BARLI CANLI SES FREKANS EKOLAYZIRI SPEKTRUMU */}
+      <div className="w-full flex items-center justify-between gap-3 p-2 bg-neutral-50 dark:bg-neutral-950 rounded-2xl border border-neutral-100 dark:border-neutral-850">
+        <span className="text-[10px] font-extrabold uppercase tracking-wider text-neutral-400 pl-2">
+          Ses Spektrumu
+        </span>
+        <AudioVisualizer isPlaying={mevcutZaman > 0} barCount={24} height={28} />
       </div>
 
       {/* Cümle Parçaları Akış Listesi */}
