@@ -29,7 +29,7 @@ Lütfen kullanıcıya kibar, net ve bilgilendirici bir Türkçe yanıt ver. Yan�
 
       try {
         const chatResponse = await ai.models.generateContent({
-          model: "gemini-2.0-flash",
+          model: "gemini-flash-latest",
           contents: [
             {
               role: "user",
@@ -42,9 +42,6 @@ Lütfen kullanıcıya kibar, net ve bilgilendirici bir Türkçe yanıt ver. Yan�
       } catch (chatErr: any) {
         console.error("Chatbot API Hatası:", chatErr);
         let chatMesaj = chatErr.message || "Yapay zeka yanıt veremedi.";
-        if (chatMesaj.includes("RESOURCE_EXHAUSTED") || chatMesaj.includes("429")) {
-          chatMesaj = "Google API kota sınırına takıldı (429 Quota Exceeded). Lütfen aistudio.google.com üzerinden yeni bir anahtar alınız.";
-        }
         return NextResponse.json({ cevap: `⚠️ ${chatMesaj}` });
       }
     }
@@ -84,7 +81,7 @@ Senden kesinlikle şu formatta, sadece saf bir JSON çıktısı vermeni istiyoru
     const base64Ses = Buffer.from(arrayBuffer).toString("base64");
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-flash-latest",
       contents: [
         {
           role: "user",
@@ -120,22 +117,10 @@ Senden kesinlikle şu formatta, sadece saf bir JSON çıktısı vermeni istiyoru
   } catch (error: any) {
     console.error("Route.ts Genel Catch Hatası:", error);
     let mesaj = error.message || "Yapay zeka analizi sırasında bir hata oluştu.";
-    let statusKodu = 500;
-
-    if (mesaj.includes("RESOURCE_EXHAUSTED") || mesaj.includes("429") || error?.status === 429) {
-      mesaj = "Google Gemini API günlük kullanım kota sınırına ulaştı (429 Quota Exceeded / Limit: 0). Lütfen https://aistudio.google.com/ adresinden yeni bir proje oluşturup yeni bir API Key alarak GEMINI_API_KEY değişkenini güncelleyin.";
-      statusKodu = 429;
-    } else if (mesaj.includes("API_KEY_SERVICE_BLOCKED") || mesaj.includes("PERMISSION_DENIED") || error?.status === 403) {
-      mesaj = "Google API anahtarında Generative Language servisi engellenmiş. Lütfen https://aistudio.google.com/ adresinden kısıtlamasız yeni bir API Key alıp Vercel'deki GEMINI_API_KEY değişkenine ekleyin.";
-      statusKodu = 403;
-    } else if (mesaj.includes("is no longer available") || mesaj.includes("NOT_FOUND") || error?.status === 404) {
-      mesaj = "Gemini model güncellendi. İstek en güncel gemini-2.0-flash modeline yönlendirildi.";
-      statusKodu = 404;
-    }
 
     return NextResponse.json(
       { error: "Google Gemini API Sorgusu Başarısız.", detay: mesaj },
-      { status: statusKodu }
+      { status: 500 }
     );
   }
 }
