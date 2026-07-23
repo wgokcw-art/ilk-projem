@@ -78,7 +78,7 @@ export default function DersNotlari() {
     setSeciliRapor(null);
     setChatMesajlari([]);
     setTamamlananGorevler({});
-    setAnalizDurumu("Ses kaydı yapay zeka (Gemini 2.5) tarafından akademik analiz ediliyor... 🧠");
+    setAnalizDurumu("Ses kaydı yapay zeka (Gemini) tarafından akademik analiz ediliyor...");
 
     try {
       const apiResponse = await fetch("/api/analiz-et", {
@@ -97,7 +97,7 @@ export default function DersNotlari() {
           sesAdi: sesNesnesi.ad,
           sureBilgisi: "API Engeli",
           isSessiz: true,
-          metin: "⚠️ Google Gemini API Anahtarı Kısıtlanmış (API_KEY_SERVICE_BLOCKED)",
+          metin: "Google Gemini API Anahtarı Kısıtlanmış (API_KEY_SERVICE_BLOCKED)",
           sinavdaCikabilir: [
             "Mevcut Firebase API Anahtarında Generative Language API servisi engellenmiş durumda.",
             "Çözüm: https://aistudio.google.com/ adresinden 1 dakikada ücretsiz yeni bir Gemini API Key alıp Vercel'deki GEMINI_API_KEY ortam değişkenine ekleyin."
@@ -239,7 +239,9 @@ export default function DersNotlari() {
                     onClick={() => sesiGercektenDinle(ses)} 
                     className="w-full py-2.5 text-xs font-black rounded-xl text-white bg-neutral-950 hover:bg-neutral-800 transition-all shadow-md active:scale-[0.99] dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 flex items-center justify-center gap-1.5"
                   >
-                    <span>📚</span>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                    </svg>
                     <span>{isleniyor === ses.id ? "Çözümleniyor..." : "Dersi Çözümle"}</span>
                   </button>
                 </div>
@@ -384,7 +386,7 @@ export default function DersNotlari() {
                               : "bg-indigo-50 text-indigo-950 border border-indigo-100 mr-6 dark:bg-neutral-800 dark:text-neutral-100 dark:border-neutral-700"
                           }`}>
                             <span className="font-black text-[10px] block opacity-70 mb-0.5">
-                              {msg.rolu === "user" ? "Siz" : "🎓 Akademik AI Asistan"}
+                              {msg.rolu === "user" ? "Siz" : "Akademik AI Asistan"}
                             </span>
                             {msg.metin}
                           </div>

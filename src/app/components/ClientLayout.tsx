@@ -159,9 +159,23 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
           <button
             onClick={temaDegistir}
-            className="p-2 px-3.5 rounded-xl border transition-all active:scale-95 cursor-pointer text-xs font-black shadow-xs bg-neutral-100 border-neutral-200 text-neutral-900 hover:bg-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-100"
+            className="p-2 px-3.5 rounded-xl border transition-all active:scale-95 cursor-pointer text-xs font-black shadow-xs bg-neutral-100 border-neutral-200 text-neutral-900 hover:bg-neutral-200 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-100 flex items-center gap-1.5"
           >
-            {karanlikMod ? "☀️ Aydınlık" : "🌙 Karanlık"}
+            {karanlikMod ? (
+              <>
+                <svg className="w-3.5 h-3.5 text-neutral-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                </svg>
+                <span>Aydınlık</span>
+              </>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5 text-neutral-800" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                </svg>
+                <span>Karanlık</span>
+              </>
+            )}
           </button>
         </div>
       </header>
@@ -199,12 +213,20 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             className="p-2 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 text-xs font-bold active:scale-95 transition-all"
             aria-label="Tema Değiştir"
           >
-            {karanlikMod ? "☀️" : "🌙"}
+            {karanlikMod ? (
+              <svg className="w-4 h-4 text-neutral-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4 text-neutral-800" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+              </svg>
+            )}
           </button>
         </div>
       </header>
 
-      {/* 📱 MOBİL YAN AÇILIR PANEL (DRAWER MENU) - BURADA SES ASİSTANI YAZISIZ, SADECE MENÜ LİSTESİ */}
+      {/* 📱 MOBİL YAN AÇILIR PANEL (DRAWER MENU) */}
       {menuAcik && (
         <div className="block md:hidden fixed inset-0 z-50">
           {/* Arka Plan Karartma & Blur */}
@@ -217,10 +239,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <div className="absolute left-0 top-0 h-full w-80 max-w-[85vw] bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800 shadow-2xl flex flex-col justify-between p-5 overflow-y-auto">
             
             <div className="space-y-5">
-              {/* Panel Üstü: Sadece Temiz Kapat Butonu & Menü Etiketi (Ses Asistanı yazısı burada KESİNLİKLE YOK!) */}
+              {/* Panel Üstü */}
               <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
-                <span className="text-xs font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
-                  📁 Klasör Seçimi
+                <span className="text-xs font-black uppercase tracking-widest text-neutral-400 dark:text-neutral-500 flex items-center gap-1.5">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-19.5 0A2.25 2.25 0 0 0 4.5 15h15a2.25 2.25 0 0 0 2.25-2.25m-19.5 0v.243a2.25 2.25 0 0 0 1.07 1.916l7.5 4.615a2.25 2.25 0 0 0 2.36 0l7.5-4.615a2.25 2.25 0 0 0 1.07-1.916V12.75" />
+                  </svg>
+                  Klasör Seçimi
                 </span>
                 
                 <button
@@ -274,9 +299,23 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
                 <button
                   onClick={temaDegistir}
-                  className="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-xs font-bold bg-neutral-50 dark:bg-neutral-800"
+                  className="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-700 text-xs font-bold bg-neutral-50 dark:bg-neutral-800 flex items-center gap-1.5"
                 >
-                  {karanlikMod ? "☀️ Aydınlık" : "🌙 Karanlık"}
+                  {karanlikMod ? (
+                    <>
+                      <svg className="w-3.5 h-3.5 text-neutral-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                      </svg>
+                      <span>Aydınlık</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3.5 h-3.5 text-neutral-800" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+                      </svg>
+                      <span>Karanlık</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>

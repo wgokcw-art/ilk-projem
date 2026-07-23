@@ -139,10 +139,38 @@ export default function GirisSayfasi() {
           {/* Özellik Piller Grubu */}
           <div className="grid grid-cols-2 gap-2.5 max-w-md mx-auto lg:mx-0">
             {[
-              { icon: '🎙️', text: 'Opus 64kbps Ses' },
-              { icon: '⚡', text: 'Gemini AI Analiz' },
-              { icon: '☁️', text: 'Bulut Depolama' },
-              { icon: '🔒', text: 'Güvenli Firebase' }
+              { 
+                text: 'Opus 64kbps Ses',
+                icon: (
+                  <svg className="w-4 h-4 opacity-80" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z" />
+                  </svg>
+                ) 
+              },
+              { 
+                text: 'Gemini AI Analiz',
+                icon: (
+                  <svg className="w-4 h-4 opacity-80" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+                  </svg>
+                ) 
+              },
+              { 
+                text: 'Bulut Depolama',
+                icon: (
+                  <svg className="w-4 h-4 opacity-80" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15a4.5 4.5 0 0 0 4.5 4.5H18a3.75 3.75 0 0 0 1.332-7.257 3 3 0 0 0-3.758-3.848 5.25 5.25 0 0 0-10.233 2.33A4.502 4.502 0 0 0 2.25 15Z" />
+                  </svg>
+                ) 
+              },
+              { 
+                text: 'Güvenli Firebase',
+                icon: (
+                  <svg className="w-4 h-4 opacity-80" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                  </svg>
+                ) 
+              }
             ].map((f) => (
               <div 
                 key={f.text} 
@@ -183,8 +211,8 @@ export default function GirisSayfasi() {
 
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {hataMesaji && (
-              <div className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold text-center animate-bounce">
-                ⚠️ {hataMesaji}
+              <div className="p-3.5 rounded-2xl border bg-red-50 border-red-200 text-red-700 dark:bg-red-950/40 dark:border-red-900 dark:text-red-300 text-xs font-bold text-center">
+                {hataMesaji}
               </div>
             )}
 

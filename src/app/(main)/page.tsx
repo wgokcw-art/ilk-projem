@@ -273,7 +273,7 @@ export default function AnaSayfa() {
 
   // 🚀 Zaman İşaretleyicisi Ekle
   const isaretEkle = () => {
-    const etiketGirdisi = prompt(`📌 ${formatSure(sure)} anına bir etiket/not yazın:`, `İşaret (${formatSure(sure)})`);
+    const etiketGirdisi = prompt(`${formatSure(sure)} anına bir etiket/not yazın:`, `İşaret (${formatSure(sure)})`);
     if (etiketGirdisi !== null) {
       const yeniIsaret = {
         zaman: sure,
@@ -517,11 +517,11 @@ export default function AnaSayfa() {
       const isaretMatch = (ses.isaretler || []).some((i: any) => (i.etiket || "").toLowerCase().includes(q));
 
       let eslesmeTuru = null;
-      if (adMatch) eslesmeTuru = "🎯 Başlık";
-      else if (canliMatch) eslesmeTuru = "🎙️ Transkript (STT)";
-      else if (ozetMatch) eslesmeTuru = "📝 AI Özeti";
-      else if (klasorMatch) eslesmeTuru = "📁 Klasör";
-      else if (isaretMatch) eslesmeTuru = "📌 İşaretler";
+      if (adMatch) eslesmeTuru = "Başlık";
+      else if (canliMatch) eslesmeTuru = "Transkript (STT)";
+      else if (ozetMatch) eslesmeTuru = "AI Özeti";
+      else if (klasorMatch) eslesmeTuru = "Klasör";
+      else if (isaretMatch) eslesmeTuru = "İşaretler";
 
       const isMatch = adMatch || canliMatch || ozetMatch || klasorMatch || isaretMatch;
       return isMatch ? { ...ses, eslesmeTuru } : null;
@@ -544,7 +544,7 @@ export default function AnaSayfa() {
         <div className="w-full border-b border-neutral-200 dark:border-neutral-800 pb-5 pt-2 sm:pt-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <p className="text-xs sm:text-sm font-bold text-neutral-500 dark:text-neutral-400">
-              👋 Hoş geldin, <span className="text-neutral-900 dark:text-neutral-100">{user?.displayName || user?.email?.split("@")[0] || "Kullanıcı"}</span>
+              Hoş geldin, <span className="text-neutral-900 dark:text-neutral-100">{user?.displayName || user?.email?.split("@")[0] || "Kullanıcı"}</span>
             </p>
             <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-2 tracking-tight text-neutral-900 dark:text-white">
               <span className="text-neutral-400 dark:text-neutral-500 text-xl">{"[-]"}</span> Ses Asistanı
@@ -584,7 +584,10 @@ export default function AnaSayfa() {
           <div className="w-full bg-white/80 border border-dashed border-neutral-200 dark:bg-neutral-900/40 dark:border-neutral-700 rounded-2xl p-3 sm:p-4 space-y-3 shadow-2xs">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-black uppercase tracking-widest pl-1 flex items-center gap-1.5">
-                <span>🔍</span> İçerik Arama Sonuçları ({filtrelenmisSesler.length})
+                <svg className="w-3.5 h-3.5 text-neutral-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.603 10.602Z" />
+                </svg>
+                İçerik Arama Sonuçları ({filtrelenmisSesler.length})
               </h3>
               <button onClick={() => setAramaKelimesi("")} className="text-neutral-400 hover:text-red-500 text-xs font-bold transition-colors lowercase">Kapat</button>
             </div>
@@ -649,12 +652,14 @@ export default function AnaSayfa() {
                     {formatSure(sure)}
                   </span>
                   
-                  {/* 🚀 2. ZAMAN İŞARETLEYİCİSİ BUTONU */}
                   <button
                     onClick={isaretEkle}
-                    className="px-2.5 py-1 rounded-full bg-amber-500 text-neutral-950 text-[10px] font-black hover:bg-amber-400 active:scale-95 transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+                    className="px-2.5 py-1 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 text-[10px] font-black hover:opacity-90 active:scale-95 transition-all shadow-xs flex items-center gap-1 cursor-pointer"
                   >
-                    <span>📌</span> İşaret Ekle
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+                    </svg>
+                    İşaret Ekle
                   </button>
                 </div>
               )}
@@ -687,9 +692,9 @@ export default function AnaSayfa() {
 
               if (kaydediyor) {
                 if (seviye > 40) {
-                  barRengi = "bg-red-500";
+                  barRengi = "bg-neutral-800 dark:bg-neutral-200";
                 } else if (seviye > 20) {
-                  barRengi = "bg-amber-500";
+                  barRengi = "bg-neutral-600 dark:bg-neutral-400";
                 }
               }
 
@@ -771,22 +776,32 @@ export default function AnaSayfa() {
                     onClick={trimmerAc}
                     className="px-3 py-2 bg-neutral-200 text-neutral-900 dark:bg-neutral-800 dark:text-white rounded-xl text-xs font-black hover:bg-neutral-300 dark:hover:bg-neutral-700 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
                   >
-                    <span>✂️</span> Sesi Kırp
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7.848 8.25a3 3 0 1 1 5.143-3.144M16.152 8.25a3 3 0 1 0-5.143-3.144M3 8.25l18 12M3 20.25l18-12" />
+                    </svg>
+                    Sesi Kırp
                   </button>
                 </div>
 
                 {/* 🚀 ZAMAN İŞARETLEYİCİLERİ LİSTESİ */}
                 {isaretler.length > 0 && (
                   <div className="w-full pt-2 border-t border-neutral-200 dark:border-neutral-800 space-y-1.5">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-neutral-400">📌 Kaydedilmiş İşaretleyiciler:</span>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-neutral-400 flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+                      </svg>
+                      Kaydedilmiş İşaretleyiciler:
+                    </span>
                     <div className="flex flex-wrap gap-2">
                       {isaretler.map((item, index) => (
                         <button
                           key={index}
                           onClick={() => isareteAtla(item.zaman)}
-                          className="px-2.5 py-1 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold hover:bg-amber-500/20 active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
+                          className="px-2.5 py-1 rounded-xl bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 text-xs font-bold hover:bg-neutral-200 active:scale-95 transition-all flex items-center gap-1 cursor-pointer"
                         >
-                          <span>📌</span>
+                          <svg className="w-3 h-3 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+                          </svg>
                           <span className="font-black">{formatSure(item.zaman)}</span>
                           <span>- {item.etiket}</span>
                         </button>
@@ -842,7 +857,10 @@ export default function AnaSayfa() {
             
             <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 pb-3">
               <h3 className="text-base font-black flex items-center gap-2 text-neutral-900 dark:text-white">
-                <span>✂️</span> Ses Kırpma Aracı
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.848 8.25a3 3 0 1 1 5.143-3.144M16.152 8.25a3 3 0 1 0-5.143-3.144M3 8.25l18 12M3 20.25l18-12" />
+                </svg>
+                Ses Kırpma Aracı
               </h3>
               <button 
                 onClick={() => setTrimmerAcik(false)}
@@ -861,7 +879,7 @@ export default function AnaSayfa() {
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-bold">
                   <span>Başlangıç Zamanı:</span>
-                  <span className="font-mono text-indigo-600 dark:text-indigo-400">{formatSure(baslangicSaniye)}</span>
+                  <span className="font-mono text-neutral-800 dark:text-neutral-200">{formatSure(baslangicSaniye)}</span>
                 </div>
                 <input 
                   type="range" 
@@ -877,7 +895,7 @@ export default function AnaSayfa() {
               <div className="space-y-1">
                 <div className="flex justify-between text-xs font-bold">
                   <span>Bitiş Zamanı:</span>
-                  <span className="font-mono text-indigo-600 dark:text-indigo-400">{formatSure(bitisSaniye)}</span>
+                  <span className="font-mono text-neutral-800 dark:text-neutral-200">{formatSure(bitisSaniye)}</span>
                 </div>
                 <input 
                   type="range" 
@@ -891,7 +909,7 @@ export default function AnaSayfa() {
 
               {/* ÖZET KUTUSU */}
               <div className="p-3 rounded-2xl bg-neutral-100 dark:bg-neutral-800 text-center text-xs font-bold">
-                Kırpılacak Yeni Süre: <span className="text-emerald-600 dark:text-emerald-400 font-mono font-black">{formatSure(Math.max(0, bitisSaniye - baslangicSaniye))}</span>
+                Kırpılacak Yeni Süre: <span className="text-neutral-900 dark:text-white font-mono font-black">{formatSure(Math.max(0, bitisSaniye - baslangicSaniye))}</span>
               </div>
             </div>
 
@@ -908,9 +926,12 @@ export default function AnaSayfa() {
                 type="button"
                 onClick={sesKirpVeKaydet}
                 disabled={kirpiliyor}
-                className="w-1/2 py-3 rounded-xl bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 text-xs font-black hover:opacity-90 active:scale-95 transition-all shadow-md disabled:opacity-50"
+                className="w-1/2 py-3 rounded-xl bg-neutral-950 text-white dark:bg-white dark:text-neutral-950 text-xs font-black hover:opacity-90 active:scale-95 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
-                {kirpiliyor ? "Kırpılıyor..." : "✂️ Kırp ve Kaydet"}
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.848 8.25a3 3 0 1 1 5.143-3.144M16.152 8.25a3 3 0 1 0-5.143-3.144M3 8.25l18 12M3 20.25l18-12" />
+                </svg>
+                <span>{kirpiliyor ? "Kırpılıyor..." : "Kırp ve Kaydet"}</span>
               </button>
             </div>
 

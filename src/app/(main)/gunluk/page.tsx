@@ -78,7 +78,7 @@ export default function Gunluk() {
     setSeciliRapor(null);
     setChatMesajlari([]);
     setTamamlananGorevler({});
-    setAnalizDurumu("Günlük kaydı yapay zeka (Gemini 2.5) tarafından duygu süzgecinden geçiriliyor... 🧠");
+    setAnalizDurumu("Günlük kaydı yapay zeka (Gemini) tarafından duygu süzgecinden geçiriliyor...");
 
     try {
       const apiResponse = await fetch("/api/analiz-et", {
@@ -97,7 +97,7 @@ export default function Gunluk() {
           sesAdi: sesNesnesi.ad,
           sureBilgisi: "API Engeli",
           isSessiz: true,
-          metin: "⚠️ Google Gemini API Anahtarı Kısıtlanmış (API_KEY_SERVICE_BLOCKED)",
+          metin: "Google Gemini API Anahtarı Kısıtlanmış (API_KEY_SERVICE_BLOCKED)",
           modAnalizi: [
             "Mevcut Firebase API Anahtarında Generative Language API servisi engellenmiş durumda.",
             "Çözüm: https://aistudio.google.com/ adresinden 1 dakikada ücretsiz yeni bir Gemini API Key alıp Vercel'deki GEMINI_API_KEY ortam değişkenine ekleyin."
@@ -239,7 +239,9 @@ export default function Gunluk() {
                     onClick={() => sesiGercektenDinle(ses)} 
                     className="w-full py-2.5 text-xs font-black rounded-xl text-white bg-neutral-950 hover:bg-neutral-800 transition-all shadow-md active:scale-[0.99] dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 flex items-center justify-center gap-1.5"
                   >
-                    <span>📓</span>
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+                    </svg>
                     <span>{isleniyor === ses.id ? "Analiz Ediliyor..." : "Günlüğü Analiz Et"}</span>
                   </button>
                 </div>
@@ -384,7 +386,7 @@ export default function Gunluk() {
                               : "bg-indigo-50 text-indigo-950 border border-indigo-100 mr-6 dark:bg-neutral-800 dark:text-neutral-100 dark:border-neutral-700"
                           }`}>
                             <span className="font-black text-[10px] block opacity-70 mb-0.5">
-                              {msg.rolu === "user" ? "Siz" : "📓 Günlük AI Danışmanı"}
+                              {msg.rolu === "user" ? "Siz" : "Günlük AI Danışmanı"}
                             </span>
                             {msg.metin}
                           </div>
