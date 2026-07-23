@@ -12,9 +12,9 @@ export default function Linkler({ karanlikMod }: { karanlikMod: boolean }) {
     { ad: "Ana Sayfa", yol: "/" },
     { ad: "Gelen Kutusu", yol: "/gelen-kutusu" },
     { ad: "Toplantılar", yol: "/toplantilar" },
+    { ad: "Takvim", yol: "/takvim" },
     { ad: "Ders Notları", yol: "/ders-notlari" },
     { ad: "Günlük", yol: "/gunluk" },
-    // 🛠️ DÜZELTME: Rota, dosya sistemindeki 'çöp kutusu' klasör adına göre güncellendi.
     { ad: "Çöp Kutusu", yol: "/cop-kutusu" },
     { ad: "Profil", yol: "/profil" }
   ];
