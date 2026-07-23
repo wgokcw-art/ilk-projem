@@ -150,8 +150,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     <div className="min-h-screen flex flex-col bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
       
       {/* 💻 MASAÜSTÜ HEADER (Mobilde KESİNLİKLE GİZLİ) */}
-      <header className="hidden md:block w-full border-b bg-white border-neutral-200 dark:bg-neutral-900 dark:border-neutral-800">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="hidden md:block sticky top-0 z-30 shrink-0 h-16 min-h-[64px] w-full border-b bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md border-neutral-200 dark:border-neutral-800">
+        <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
           <div
             onClick={() => router.push("/")}
             className="flex items-center gap-3 cursor-pointer select-none"

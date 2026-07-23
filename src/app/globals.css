@@ -8,6 +8,8 @@ html {
   background-color: #f9fafb;
   color: #171717;
   transition: filter 0.3s ease;
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
 }
 
 /* 🌙 KARANLIK MOD */
