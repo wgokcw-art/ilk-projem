@@ -10,6 +10,7 @@ import InteraktifTranskript from "../../components/InteraktifTranskript";
 import TakvimHatirlaticiModal from "../../components/TakvimHatirlaticiModal";
 import DilCeviriBar from "../../components/DilCeviriBar";
 import KonusmaciAnalizPaneli from "../../components/KonusmaciAnalizPaneli";
+import MindMap from "../../components/MindMap";
 
 export default function DersNotlari() {
   const router = useRouter();
@@ -324,6 +325,14 @@ export default function DersNotlari() {
                         }
                       }
                     }}
+                  />
+
+                  {/* 🌳 OTOMATİK GÖRSEL ZİHİN HARİTASI (MIND MAP) */}
+                  <MindMap
+                    zihinHaritasi={seciliRapor.zihinHaritasi}
+                    ozet={seciliRapor.metin}
+                    kritikler={seciliRapor.sinavdaCikabilir}
+                    klasorAdi="Ders Notu"
                   />
 
                   {/* Özet */}

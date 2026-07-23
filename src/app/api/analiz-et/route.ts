@@ -139,6 +139,13 @@ Senden kesinlikle şu formatta, sadece saf bir JSON çıktısı vermeni istiyoru
     { "zaman": 0, "konusan": "Konuşmacı 1", "metin": "Konuşulan ilk cümle..." },
     { "zaman": 5, "konusan": "Konuşmacı 2", "metin": "Konuşulan ikinci cümle..." }
   ],
+  "zihinHaritasi": {
+    "anaKonu": "Ana Ders veya Toplantı Konusu",
+    "altBasliklar": [
+      { "baslik": "Alt Başlık 1", "maddeler": ["Detay veya karar 1", "Detay veya karar 2"] },
+      { "baslik": "Alt Başlık 2", "maddeler": ["Detay veya karar 3", "Detay veya karar 4"] }
+    ]
+  },
   "sentiment": "Olumlu / Profesyonel / Heyecanlı / Stresli / Nötr",
   "tone": "Örn: Yapıcı, Kararlı ve Analitik"
 }`;

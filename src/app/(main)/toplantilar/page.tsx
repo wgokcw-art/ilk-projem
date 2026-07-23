@@ -10,6 +10,7 @@ import InteraktifTranskript from "../../components/InteraktifTranskript";
 import TakvimHatirlaticiModal from "../../components/TakvimHatirlaticiModal";
 import DilCeviriBar from "../../components/DilCeviriBar";
 import KonusmaciAnalizPaneli from "../../components/KonusmaciAnalizPaneli";
+import MindMap from "../../components/MindMap";
 
 export default function Toplantilar() {
   const router = useRouter();
@@ -339,6 +340,14 @@ export default function Toplantilar() {
                         }
                       }
                     }}
+                  />
+
+                  {/* 🌳 OTOMATİK GÖRSEL ZİHİN HARİTASI (MIND MAP) */}
+                  <MindMap
+                    zihinHaritasi={seciliRapor.zihinHaritasi}
+                    ozet={seciliRapor.metin}
+                    kritikler={seciliRapor.kritikYerler}
+                    klasorAdi="Toplantı"
                   />
 
                   {/* Özet */}
