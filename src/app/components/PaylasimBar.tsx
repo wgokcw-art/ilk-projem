@@ -164,8 +164,8 @@ export default function PaylasimBar({ rapor, klasorAdi }: PaylasimBarProps) {
         <button
           type="button"
           onClick={pdfIndir}
-          className="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 text-xs font-bold hover:bg-neutral-100 dark:hover:bg-neutral-800 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
-          title="Raporu PDF olarak indir veya yazdır"
+          className="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 text-xs font-bold hover:bg-neutral-100 dark:hover:bg-neutral-800 active:scale-95 hover:scale-105 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs interactive-btn"
+          title="Yazdır veya PDF olarak kaydet"
         >
           <svg className="w-3.5 h-3.5 text-neutral-700 dark:text-neutral-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
@@ -177,7 +177,7 @@ export default function PaylasimBar({ rapor, klasorAdi }: PaylasimBarProps) {
         <button
           type="button"
           onClick={whatsappPaylas}
-          className="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 text-xs font-bold hover:bg-neutral-100 dark:hover:bg-neutral-800 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+          className="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 text-xs font-bold hover:bg-neutral-100 dark:hover:bg-neutral-800 active:scale-95 hover:scale-105 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs interactive-btn"
           title="WhatsApp üzerinden özet paylaş"
         >
           <svg className="w-3.5 h-3.5 text-neutral-700 dark:text-neutral-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -190,7 +190,7 @@ export default function PaylasimBar({ rapor, klasorAdi }: PaylasimBarProps) {
         <button
           type="button"
           onClick={epostaPaylas}
-          className="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 text-xs font-bold hover:bg-neutral-100 dark:hover:bg-neutral-800 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+          className="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 text-xs font-bold hover:bg-neutral-100 dark:hover:bg-neutral-800 active:scale-95 hover:scale-105 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs interactive-btn"
           title="E-posta ile gönder"
         >
           <svg className="w-3.5 h-3.5 text-neutral-700 dark:text-neutral-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -203,7 +203,7 @@ export default function PaylasimBar({ rapor, klasorAdi }: PaylasimBarProps) {
         <button
           type="button"
           onClick={panoyaKopyala}
-          className="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 text-xs font-bold hover:bg-neutral-100 dark:hover:bg-neutral-800 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
+          className="px-3 py-1.5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200 text-xs font-bold hover:bg-neutral-100 dark:hover:bg-neutral-800 active:scale-95 hover:scale-105 transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs interactive-btn"
           title="Tüm raporu metin olarak kopyala"
         >
           <svg className="w-3.5 h-3.5 text-neutral-700 dark:text-neutral-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

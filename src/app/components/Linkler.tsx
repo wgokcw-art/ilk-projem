@@ -29,10 +29,10 @@ export default function Linkler({ karanlikMod }: { karanlikMod: boolean }) {
           <button
             key={item.yol}
             onClick={() => router.push(item.yol)}
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer ${
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer interactive-btn ${
               isActive
-                ? "bg-neutral-950 text-white" // Aydınlık modda siyah baloncuk, beyaz yazı
-                : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+                ? "bg-neutral-950 text-white shadow-sm" // Aydınlık modda siyah baloncuk, beyaz yazı
+                : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100/70 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-neutral-800/70"
             }`}
             // 🎯 KRİTİK FİLTRE: Eğer buton aktifse ve globals.css içindeki html.dark invert filtresi devredeyse,
             // bu inline style filtreyi tersine çevirerek butonu BEBEYAZ BALONCUK, yazıyı da SİMSİYAH yapar.
