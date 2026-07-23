@@ -79,7 +79,10 @@ ${JSON.stringify(rapor, null, 2)}
               role: "user",
               parts: [{ text: cevirPrompt }]
             }
-          ]
+          ],
+          config: {
+            responseMimeType: "application/json"
+          }
         });
 
         let temizCeveText = (cevirResponse.text || "").trim();
@@ -87,11 +90,21 @@ ${JSON.stringify(rapor, null, 2)}
           temizCeveText = temizCeveText.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
         }
 
-        const ceviriSonucu = JSON.parse(temizCeveText);
+        let ceviriSonucu: any = {};
+        try {
+          ceviriSonucu = JSON.parse(temizCeveText);
+        } catch {
+          const jsonStart = temizCeveText.indexOf("{");
+          const jsonEnd = temizCeveText.lastIndexOf("}");
+          if (jsonStart !== -1 && jsonEnd !== -1) {
+            ceviriSonucu = JSON.parse(temizCeveText.substring(jsonStart, jsonEnd + 1));
+          }
+        }
+
         return NextResponse.json(ceviriSonucu);
       } catch (cevirErr: any) {
         console.error("Çeviri API Hatası:", cevirErr);
-        return NextResponse.json({ error: "Dil çevirisi yapılamadı." }, { status: 500 });
+        return NextResponse.json({ error: cevirErr.message || "Dil çevirisi yapılamadı." }, { status: 500 });
       }
     }
 

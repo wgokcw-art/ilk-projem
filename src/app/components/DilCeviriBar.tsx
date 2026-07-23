@@ -53,18 +53,31 @@ export default function DilCeviriBar({
     // Yapay zeka ile çeviri isteği atalım
     try {
       setCeviriliyor(true);
+
+      // Sadece çevrilecek metinsel verileri pakete koyalım
+      const temizRapor = {
+        metin: orijinalRapor.metin || "",
+        actionItems: orijinalRapor.actionItems || [],
+        kritikYerler: orijinalRapor.kritikYerler || [],
+        sinavdaCikabilir: orijinalRapor.sinavdaCikabilir || [],
+        modAnalizi: orijinalRapor.modAnalizi || [],
+        sentiment: orijinalRapor.sentiment || "",
+        tone: orijinalRapor.tone || ""
+      };
+
       const res = await fetch("/api/analiz-et", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           mode: "cevir",
-          rapor: orijinalRapor,
+          rapor: temizRapor,
           hedefDil: hedefDilObj.ad,
         }),
       });
 
       if (!res.ok) {
-        throw new Error("Çeviri isteği başarısız oldu.");
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || "Çeviri isteği başarısız oldu.");
       }
 
       const cevrilenData = await res.json();
@@ -72,9 +85,8 @@ export default function DilCeviriBar({
 
       setCeviriCache((prev) => ({ ...prev, [hedefDilObj.kod]: birlesikRapor }));
       onRaporGuncelle(birlesikRapor);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Dil çevirisi hatası:", err);
-      alert("Yapay zeka çevirisi oluşturulurken bir hata oluştu.");
       setAktifDil("tr");
       onRaporGuncelle(orijinalRapor);
     } finally {
