@@ -263,17 +263,20 @@ export default function DersNotlari() {
                   
                   {/* Başlık & Duygu/Ton Rozetleri */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-100 dark:border-neutral-800 pb-3">
-                    <h3 className="font-black text-sm text-neutral-900 dark:text-white">
-                      🎓 {seciliRapor.sesAdi}
+                    <h3 className="font-black text-sm text-neutral-900 dark:text-white flex items-center gap-2">
+                      <svg className="w-4 h-4 text-neutral-800 dark:text-neutral-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                      </svg>
+                      {seciliRapor.sesAdi}
                     </h3>
 
-                    {/* 🎭 4. DUYGU VE TON ANALİZ ROZETİ */}
+                    {/* DUYGU VE TON ANALİZ ROZETİ */}
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-300 text-[10px] font-black">
-                        🎭 {seciliRapor.sentiment}
+                      <span className="px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 text-[10px] font-black">
+                        Duygu: {seciliRapor.sentiment}
                       </span>
-                      <span className="px-2.5 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-600 dark:text-teal-300 text-[10px] font-black">
-                        💬 {seciliRapor.tone}
+                      <span className="px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 text-[10px] font-black">
+                        Ton: {seciliRapor.tone}
                       </span>
                     </div>
                   </div>
@@ -289,7 +292,12 @@ export default function DersNotlari() {
                   {/* Sınavda Çıkabilecek Yerler */}
                   {seciliRapor.sinavdaCikabilir && seciliRapor.sinavdaCikabilir.length > 0 && (
                     <div className="border border-neutral-200 bg-neutral-50 rounded-2xl p-4 space-y-2 dark:bg-neutral-950 dark:border-neutral-800">
-                      <h4 className="text-[11px] font-black uppercase tracking-wider text-rose-600 dark:text-rose-400">🎯 Sınavda Çıkabilecek Yerler</h4>
+                      <h4 className="text-[11px] font-black uppercase tracking-wider text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                        </svg>
+                        Sınavda Çıkabilecek Yerler
+                      </h4>
                       <ul className="space-y-2 text-xs font-bold">
                         {seciliRapor.sinavdaCikabilir.map((k: any, i: number) => (
                           <li key={i} className="p-2.5 rounded-xl border bg-white border-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-200">
@@ -300,11 +308,14 @@ export default function DersNotlari() {
                     </div>
                   )}
 
-                  {/* ✅ 2. DERS ÖDEVLERİ & ÇALIŞMA GÖREVLERİ (TO-DO) */}
+                  {/* DERS ÖDEVLERİ & ÇALIŞMA GÖREVLERİ (TO-DO) */}
                   {seciliRapor.actionItems && seciliRapor.actionItems.length > 0 && (
                     <div className="border border-neutral-200 bg-neutral-50 rounded-2xl p-4 space-y-3 dark:bg-neutral-950 dark:border-neutral-800">
-                      <h4 className="text-[11px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                        <span>✅</span> Ders Ödevleri & Çalışma Adımları
+                      <h4 className="text-[11px] font-black uppercase tracking-wider text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        Ders Ödevleri & Çalışma Adımları
                       </h4>
                       <div className="space-y-2">
                         {seciliRapor.actionItems.map((gorev: string, idx: number) => {
@@ -314,7 +325,7 @@ export default function DersNotlari() {
                               key={idx} 
                               className={`flex items-start gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${
                                 isChecked 
-                                  ? "bg-emerald-50 border-emerald-200 text-emerald-800 line-through dark:bg-emerald-950/30 dark:border-emerald-900 dark:text-emerald-300 opacity-60" 
+                                  ? "bg-neutral-100 border-neutral-300 text-neutral-500 line-through dark:bg-neutral-900 dark:border-neutral-700 opacity-60" 
                                   : "bg-white border-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-200"
                               }`}
                             >
@@ -322,7 +333,7 @@ export default function DersNotlari() {
                                 type="checkbox" 
                                 checked={isChecked} 
                                 onChange={() => setTamamlananGorevler(p => ({ ...p, [idx]: !p[idx] }))}
-                                className="mt-0.5 accent-emerald-600 rounded cursor-pointer"
+                                className="mt-0.5 accent-neutral-950 dark:accent-white rounded cursor-pointer"
                               />
                               <span className="text-xs font-bold leading-tight">{gorev}</span>
                             </label>
@@ -335,7 +346,12 @@ export default function DersNotlari() {
                   {/* Özet Tanımlar */}
                   {seciliRapor.ozetTanimlar && seciliRapor.ozetTanimlar.length > 0 && (
                     <div className="border border-neutral-200 bg-neutral-50 rounded-2xl p-4 space-y-2 dark:bg-neutral-950 dark:border-neutral-800">
-                      <h4 className="text-[11px] font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400">📚 Özet Tanımlar</h4>
+                      <h4 className="text-[11px] font-black uppercase tracking-wider text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25" />
+                        </svg>
+                        Özet Tanımlar
+                      </h4>
                       <ul className="space-y-2 text-xs font-bold">
                         {seciliRapor.ozetTanimlar.map((t: any, i: number) => (
                           <li key={i} className="p-2.5 rounded-xl border bg-white border-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-200">
@@ -346,13 +362,16 @@ export default function DersNotlari() {
                     </div>
                   )}
 
-                  {/* 💬 1. DERS HAKKINDA AI SOHBET ROBOTU (AI CHATBOT) */}
-                  <div className="border border-indigo-200 bg-indigo-50/50 rounded-2xl p-4 space-y-3 dark:bg-indigo-950/20 dark:border-indigo-900/60">
+                  {/* DERS HAKKINDA AI SOHBET ROBOTU (AI CHATBOT) */}
+                  <div className="border border-neutral-200 bg-white rounded-2xl p-4 space-y-3 dark:bg-neutral-950 dark:border-neutral-800">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
-                        <span>💬</span> Ders Hakkında AI'ya Soru Sor
+                      <h4 className="text-xs font-black uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+                        </svg>
+                        Ders Hakkında AI'ya Soru Sor
                       </h4>
-                      <span className="text-[9px] font-extrabold text-indigo-500">Gemini Academic AI</span>
+                      <span className="text-[9px] font-extrabold text-neutral-400">Gemini Academic AI</span>
                     </div>
 
                     {/* Chat Geçmişi */}

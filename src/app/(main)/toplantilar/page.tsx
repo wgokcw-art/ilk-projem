@@ -278,17 +278,20 @@ export default function Toplantilar() {
                   
                   {/* Başlık & Duygu/Ton Rozetleri */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-100 dark:border-neutral-800 pb-3">
-                    <h3 className="font-black text-sm text-neutral-900 dark:text-white">
-                      📊 {seciliRapor.sesAdi}
+                    <h3 className="font-black text-sm text-neutral-900 dark:text-white flex items-center gap-2">
+                      <svg className="w-4 h-4 text-neutral-800 dark:text-neutral-200" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                      </svg>
+                      {seciliRapor.sesAdi}
                     </h3>
 
-                    {/* 🎭 4. DUYGU VE TON ANALİZ ROZETİ */}
+                    {/* DUYGU VE TON ANALİZ ROZETİ */}
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-600 dark:text-purple-300 text-[10px] font-black">
-                        🎭 {seciliRapor.sentiment}
+                      <span className="px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 text-[10px] font-black">
+                        Duygu: {seciliRapor.sentiment}
                       </span>
-                      <span className="px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-300 text-[10px] font-black">
-                        💬 {seciliRapor.tone}
+                      <span className="px-2.5 py-1 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-800 dark:text-neutral-200 text-[10px] font-black">
+                        Ton: {seciliRapor.tone}
                       </span>
                     </div>
                   </div>
@@ -298,17 +301,25 @@ export default function Toplantilar() {
 
                   {/* Özet */}
                   <div className="space-y-1">
-                    <h4 className="text-[11px] font-black uppercase tracking-wider text-neutral-400">📝 Genel Özet</h4>
+                    <h4 className="text-[11px] font-black uppercase tracking-wider text-neutral-400 flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                      </svg>
+                      Genel Özet
+                    </h4>
                     <p className="text-xs font-medium leading-relaxed p-3.5 rounded-2xl bg-neutral-50 text-neutral-800 border border-neutral-100 dark:bg-neutral-950 dark:text-neutral-200 dark:border-neutral-800">
                       {seciliRapor.metin}
                     </p>
                   </div>
 
-                  {/* ✅ 2. OTOMATİK GÖREV LİSTESİ (ACTION ITEMS & TO-DO) */}
+                  {/* OTOMATİK GÖREV LİSTESİ (ACTION ITEMS & TO-DO) */}
                   {seciliRapor.actionItems && seciliRapor.actionItems.length > 0 && (
                     <div className="border border-neutral-200 bg-neutral-50 rounded-2xl p-4 space-y-3 dark:bg-neutral-950 dark:border-neutral-800">
-                      <h4 className="text-[11px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                        <span>✅</span> Yapılacak Görevler Listesi (To-Do)
+                      <h4 className="text-[11px] font-black uppercase tracking-wider text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        Yapılacak Görevler Listesi (To-Do)
                       </h4>
                       <div className="space-y-2">
                         {seciliRapor.actionItems.map((gorev: string, idx: number) => {
@@ -318,7 +329,7 @@ export default function Toplantilar() {
                               key={idx} 
                               className={`flex items-start gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer ${
                                 isChecked 
-                                  ? "bg-emerald-50 border-emerald-200 text-emerald-800 line-through dark:bg-emerald-950/30 dark:border-emerald-900 dark:text-emerald-300 opacity-60" 
+                                  ? "bg-neutral-100 border-neutral-300 text-neutral-500 line-through dark:bg-neutral-900 dark:border-neutral-700 opacity-60" 
                                   : "bg-white border-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-200"
                               }`}
                             >
@@ -326,7 +337,7 @@ export default function Toplantilar() {
                                 type="checkbox" 
                                 checked={isChecked} 
                                 onChange={() => setTamamlananGorevler(p => ({ ...p, [idx]: !p[idx] }))}
-                                className="mt-0.5 accent-emerald-600 rounded cursor-pointer"
+                                className="mt-0.5 accent-neutral-950 dark:accent-white rounded cursor-pointer"
                               />
                               <span className="text-xs font-bold leading-tight">{gorev}</span>
                             </label>
@@ -336,17 +347,20 @@ export default function Toplantilar() {
                     </div>
                   )}
 
-                  {/* 👥 3. KONUŞMACI AYRIMI & DİYALOGLAR (DIARIZATION) */}
+                  {/* KONUŞMACI AYRIMI & DİYALOGLAR (DIARIZATION) */}
                   {seciliRapor.speakers && seciliRapor.speakers.length > 0 && (
                     <div className="border border-neutral-200 bg-neutral-50 rounded-2xl p-4 space-y-3 dark:bg-neutral-950 dark:border-neutral-800">
-                      <h4 className="text-[11px] font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
-                        <span>👥</span> Konuşmacı Diyalogları (Diarization)
+                      <h4 className="text-[11px] font-black uppercase tracking-wider text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                        </svg>
+                        Konuşmacı Diyalogları (Diarization)
                       </h4>
                       <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                         {seciliRapor.speakers.map((sp: any, idx: number) => (
                           <div key={idx} className="p-2.5 rounded-xl bg-white border border-neutral-200 dark:bg-neutral-900 dark:border-neutral-800 space-y-1">
                             <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300">
-                              👤 {sp.speaker}
+                              {sp.speaker}
                             </span>
                             <p className="text-xs font-medium text-neutral-800 dark:text-neutral-200 pl-1">{sp.text}</p>
                           </div>
@@ -358,7 +372,12 @@ export default function Toplantilar() {
                   {/* Kritik Noktalar */}
                   {seciliRapor.kritikYerler && seciliRapor.kritikYerler.length > 0 && (
                     <div className="border border-neutral-200 bg-neutral-50 rounded-2xl p-4 space-y-2 dark:bg-neutral-950 dark:border-neutral-800">
-                      <h4 className="text-[11px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">⚡ Kritik Vurgular</h4>
+                      <h4 className="text-[11px] font-black uppercase tracking-wider text-neutral-800 dark:text-neutral-200 flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                        </svg>
+                        Kritik Vurgular
+                      </h4>
                       <ul className="space-y-2 text-xs font-bold">
                         {seciliRapor.kritikYerler.map((k: any, i: number) => (
                           <li key={i} className="p-2.5 rounded-xl border bg-white border-neutral-200 text-neutral-800 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-200">
@@ -369,13 +388,16 @@ export default function Toplantilar() {
                     </div>
                   )}
 
-                  {/* 💬 1. SES KAYDIYLA AI SOHBET ROBOTU (AI CHATBOT) */}
-                  <div className="border border-indigo-200 bg-indigo-50/50 rounded-2xl p-4 space-y-3 dark:bg-indigo-950/20 dark:border-indigo-900/60">
+                  {/* SES KAYDIYLA AI SOHBET ROBOTU (AI CHATBOT) */}
+                  <div className="border border-neutral-200 bg-white rounded-2xl p-4 space-y-3 dark:bg-neutral-950 dark:border-neutral-800">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300 flex items-center gap-1.5">
-                        <span>💬</span> Ses Kaydıyla AI Sohbet Et
+                      <h4 className="text-xs font-black uppercase tracking-wider text-neutral-900 dark:text-white flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+                        </svg>
+                        Ses Kaydıyla AI Sohbet Et
                       </h4>
-                      <span className="text-[9px] font-extrabold text-indigo-500">Gemini Live Q&A</span>
+                      <span className="text-[9px] font-extrabold text-neutral-400">Gemini AI</span>
                     </div>
 
                     {/* Chat Geçmişi */}
