@@ -9,6 +9,7 @@ import PaylasimBar from "../../components/PaylasimBar";
 import InteraktifTranskript from "../../components/InteraktifTranskript";
 import TakvimHatirlaticiModal from "../../components/TakvimHatirlaticiModal";
 import DilCeviriBar from "../../components/DilCeviriBar";
+import KonusmaciAnalizPaneli from "../../components/KonusmaciAnalizPaneli";
 
 export default function DersNotlari() {
   const router = useRouter();
@@ -401,6 +402,12 @@ export default function DersNotlari() {
                       </div>
                     </div>
                   )}
+
+                  {/* 📊 KONUŞMACI İLETİŞİM & SÜRE ANALİZİ (TALK-TIME ANALYTICS) */}
+                  <KonusmaciAnalizPaneli
+                    konusmaciAnalizi={seciliRapor.konusmaciAnalizi}
+                    transkriptZamanli={seciliRapor.transkriptZamanli}
+                  />
 
                   {/* Özet Tanımlar */}
                   {seciliRapor.ozetTanimlar && seciliRapor.ozetTanimlar.length > 0 && (

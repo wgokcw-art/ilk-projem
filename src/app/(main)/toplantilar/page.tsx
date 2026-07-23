@@ -9,6 +9,7 @@ import PaylasimBar from "../../components/PaylasimBar";
 import InteraktifTranskript from "../../components/InteraktifTranskript";
 import TakvimHatirlaticiModal from "../../components/TakvimHatirlaticiModal";
 import DilCeviriBar from "../../components/DilCeviriBar";
+import KonusmaciAnalizPaneli from "../../components/KonusmaciAnalizPaneli";
 
 export default function Toplantilar() {
   const router = useRouter();
@@ -405,6 +406,12 @@ export default function Toplantilar() {
                       </div>
                     </div>
                   )}
+
+                  {/* 📊 KONUŞMACI İLETİŞİM & SÜRE ANALİZİ (TALK-TIME ANALYTICS) */}
+                  <KonusmaciAnalizPaneli
+                    konusmaciAnalizi={seciliRapor.konusmaciAnalizi}
+                    transkriptZamanli={seciliRapor.transkriptZamanli}
+                  />
 
                   {/* KONUŞMACI AYRIMI & DİYALOGLAR (DIARIZATION) */}
                   {seciliRapor.speakers && seciliRapor.speakers.length > 0 && (

@@ -131,6 +131,10 @@ Senden kesinlikle şu formatta, sadece saf bir JSON çıktısı vermeni istiyoru
     { "speaker": "Konuşmacı 1", "text": "Konuşulan cümle..." },
     { "speaker": "Konuşmacı 2", "text": "Konuşulan cümle..." }
   ],
+  "konusmaciAnalizi": [
+    { "isim": "Konuşmacı 1", "yuzde": 65, "rol": "Ana Konuşmacı / Yönlendirici", "aciklama": "Toplantıyı yönetti ve kararları özetledi." },
+    { "isim": "Konuşmacı 2", "yuzde": 35, "rol": "Katılımcı / Soru Soran", "aciklama": "Sorular sordu ve detayları netleştirdi." }
+  ],
   "transkriptZamanli": [
     { "zaman": 0, "konusan": "Konuşmacı 1", "metin": "Konuşulan ilk cümle..." },
     { "zaman": 5, "konusan": "Konuşmacı 2", "metin": "Konuşulan ikinci cümle..." }
