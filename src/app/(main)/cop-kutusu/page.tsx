@@ -84,22 +84,17 @@ export default function CopKutusu() {
 
   // 🔥 KALICI SİLME FONKSİYONU: Kaydı Firestore'dan tamamen siler
   const kaliciSil = async (id: string) => {
-    if (!confirm("Kalıcı olarak silinecek. Emin misiniz?")) return;
-
     try {
       await deleteDoc(doc(db, "sesler", id));
       setSesler((prev) => prev.filter((s) => s.id !== id));
-      alert("Ses kaydı buluttan kalıcı olarak kaldırıldı.");
     } catch (error) {
       console.error("Silme hatası:", error);
-      alert("Dosya silinemedi.");
     }
   };
 
   // 🧹 ÇÖPÜ TAMAMEN BOŞALTMA FONKSİYONU: Toplu silme işlemi yapar
   const copuTamamenBosalt = async () => {
     if (sesler.length === 0) return;
-    if (!confirm("Tüm çöp kutusu kalıcı olarak temizlenecek. Emin misiniz?")) return;
 
     try {
       const batch = writeBatch(db);
@@ -110,10 +105,8 @@ export default function CopKutusu() {
 
       await batch.commit();
       setSesler([]);
-      alert("Çöp kutusu tamamen boşaltıldı.");
     } catch (error) {
       console.error("Toplu silme hatası:", error);
-      alert("Çöp kutusu boşaltılırken bir hata yaşandı.");
     }
   };
 

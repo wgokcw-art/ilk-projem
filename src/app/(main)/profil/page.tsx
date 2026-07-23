@@ -95,14 +95,13 @@ export default function ProfilSayfasi() {
     }
   };
 
-  // 🎯 GÜVENLİ ÇIKIŞ YAPMA
+  // 🎯 GÜVENLİ ÇIKIŞ YAPMA (Non-blocking instant sign out)
   const handleCikisYap = async () => {
-    if (!confirm("Oturumu kapatmak istediğinize emin misiniz?")) return;
     try {
       await signOut(auth);
       router.push("/giris");
     } catch (error) {
-      alert("Çıkış yapılırken bir hata oluştu.");
+      console.error("Çıkış yapılırken bir hata oluştu:", error);
     }
   };
 
