@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "../../../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
 import PaylasimBar from "../../components/PaylasimBar";
+import InteraktifTranskript from "../../components/InteraktifTranskript";
 
 export default function Toplantilar() {
   const router = useRouter();
@@ -15,6 +16,8 @@ export default function Toplantilar() {
   const [analizDurumu, setAnalizDurumu] = useState<string>(" ");
   const [seciliRapor, setSeciliRapor] = useState<any | null>(null);
   const [seciliSes, setSeciliSes] = useState<any | null>(null);
+  const [mevcutZaman, setMevcutZaman] = useState<number>(0);
+  const audioRefs = useRef<{ [key: string]: HTMLAudioElement | null }>({});
 
   const [istemciHazir, setIstemciHazir] = useState(false);
   const [yukleniyor, setYukleniyor] = useState(true);
@@ -249,7 +252,13 @@ export default function Toplantilar() {
                     </div>
                     <button onClick={() => sesSil(ses.id)} className="px-3 py-1 text-xs font-bold rounded-xl border bg-white border-neutral-200 hover:bg-red-50 hover:text-red-600 transition-all dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-200">Sil</button>
                   </div>
-                  <audio controls className="w-full h-8 accent-neutral-950" src={ses.kaynak} />
+                  <audio 
+                    ref={(el) => { audioRefs.current[ses.id] = el; }}
+                    onTimeUpdate={(e) => setMevcutZaman(e.currentTarget.currentTime)}
+                    controls 
+                    className="w-full h-8 accent-neutral-950" 
+                    src={ses.kaynak} 
+                  />
                   <button 
                     onClick={() => sesiGercektenDinle(ses)} 
                     className="w-full py-2.5 text-xs font-black rounded-xl text-white bg-neutral-950 hover:bg-neutral-800 transition-all shadow-md active:scale-[0.99] dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-100 flex items-center justify-center gap-1.5"
@@ -300,6 +309,22 @@ export default function Toplantilar() {
 
                   {/* 📤 3. DIŞA AKTARMA VE PAYLAŞIM BARI */}
                   <PaylasimBar rapor={seciliRapor} klasorAdi="Toplantılar" />
+
+                  {/* 🎙️ İNTERAKTİF TRANSKRİPT (ZAMANA TIKLA & DİNLE) */}
+                  <InteraktifTranskript 
+                    metinParcalari={seciliRapor.transkriptZamanli}
+                    duzMetin={seciliRapor.metin}
+                    mevcutZaman={mevcutZaman}
+                    onZamanaAtla={(zaman) => {
+                      if (seciliSes && audioRefs.current[seciliSes.id]) {
+                        const audio = audioRefs.current[seciliSes.id];
+                        if (audio) {
+                          audio.currentTime = zaman;
+                          audio.play();
+                        }
+                      }
+                    }}
+                  />
 
                   {/* Özet */}
                   <div className="space-y-1">

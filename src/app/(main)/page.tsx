@@ -6,6 +6,7 @@ import { auth, db } from "../../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
 import IstatistikPaneli from "../components/IstatistikPaneli";
+import InteraktifTranskript from "../components/InteraktifTranskript";
 
 const CLOUDINARY_CLOUD_NAME = "ng89mhgm";
 const CLOUDINARY_UPLOAD_PRESET = "ses_asistani";
@@ -91,6 +92,7 @@ export default function AnaSayfa() {
 
   // 🚀 3. Oynatma Hızı State'i
   const [oynatmaHizi, setOynatmaHizi] = useState<number>(1.0);
+  const [mevcutZaman, setMevcutZaman] = useState<number>(0);
   const mainAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // 🚀 4. Ses Kırpma Modal State'leri
@@ -747,6 +749,7 @@ export default function AnaSayfa() {
                 <div className="w-full flex flex-col sm:flex-row items-center gap-3 justify-between">
                   <audio 
                     ref={mainAudioRef}
+                    onTimeUpdate={(e) => setMevcutZaman(e.currentTarget.currentTime)}
                     controls 
                     className="w-full accent-neutral-950" 
                     src={sesUrl} 
@@ -782,6 +785,20 @@ export default function AnaSayfa() {
                     Sesi Kırp
                   </button>
                 </div>
+
+                {/* 🎙️ İNTERAKTİF TRANSKRİPT (ZAMANA TIKLA & DİNLE) */}
+                {canliMetin && (
+                  <InteraktifTranskript
+                    duzMetin={canliMetin}
+                    mevcutZaman={mevcutZaman}
+                    onZamanaAtla={(zaman) => {
+                      if (mainAudioRef.current) {
+                        mainAudioRef.current.currentTime = zaman;
+                        mainAudioRef.current.play();
+                      }
+                    }}
+                  />
+                )}
 
                 {/* 🚀 ZAMAN İŞARETLEYİCİLERİ LİSTESİ */}
                 {isaretler.length > 0 && (
