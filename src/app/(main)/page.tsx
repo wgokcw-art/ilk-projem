@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { auth, db } from "../../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import IstatistikPaneli from "../components/IstatistikPaneli";
 
 const CLOUDINARY_CLOUD_NAME = "ng89mhgm";
 const CLOUDINARY_UPLOAD_PRESET = "ses_asistani";
@@ -505,8 +506,28 @@ export default function AnaSayfa() {
   };
 
   const filtrelenmisSesler = (tumKlasorSesleri || [])
-    .filter((ses) => ses && ses.ad && ses.ad.toLowerCase().includes((aramaKelimesi || "").toLowerCase()))
-    .sort((a, b) =>
+    .map((ses) => {
+      if (!ses || !aramaKelimesi.trim()) return null;
+      const q = aramaKelimesi.toLowerCase().trim();
+
+      const adMatch = (ses.ad || "").toLowerCase().includes(q);
+      const canliMatch = (ses.canliMetin || "").toLowerCase().includes(q);
+      const ozetMatch = (ses.metin || "").toLowerCase().includes(q);
+      const klasorMatch = (ses.bulunduguKlasor || "").toLowerCase().includes(q);
+      const isaretMatch = (ses.isaretler || []).some((i: any) => (i.etiket || "").toLowerCase().includes(q));
+
+      let eslesmeTuru = null;
+      if (adMatch) eslesmeTuru = "🎯 Başlık";
+      else if (canliMatch) eslesmeTuru = "🎙️ Transkript (STT)";
+      else if (ozetMatch) eslesmeTuru = "📝 AI Özeti";
+      else if (klasorMatch) eslesmeTuru = "📁 Klasör";
+      else if (isaretMatch) eslesmeTuru = "📌 İşaretler";
+
+      const isMatch = adMatch || canliMatch || ozetMatch || klasorMatch || isaretMatch;
+      return isMatch ? { ...ses, eslesmeTuru } : null;
+    })
+    .filter(Boolean)
+    .sort((a: any, b: any) =>
       siralamYonu === "yeni"
         ? (b.olusturmaZamani || 0) - (a.olusturmaZamani || 0)
         : (a.olusturmaZamani || 0) - (b.olusturmaZamani || 0)
@@ -538,7 +559,7 @@ export default function AnaSayfa() {
             <div className="relative w-full">
               <input
                 type="text"
-                placeholder="Tüm klasörlerde ara..."
+                placeholder="Başlık, transkript, özette ara..."
                 value={aramaKelimesi}
                 onChange={(e) => setAramaKelimesi(e.target.value)}
                 className="w-full pl-8 pr-3 py-1.5 text-xs font-bold text-neutral-900 bg-neutral-50 border border-neutral-100 dark:bg-neutral-800 dark:text-white dark:border-neutral-700 rounded-xl focus:outline-none placeholder-neutral-400"
@@ -558,26 +579,34 @@ export default function AnaSayfa() {
           </div>
         </div>
 
+        {/* AKILLI İÇERİK ARAMA SONUÇLARI */}
         {aramaKelimesi.trim() !== "" && (
           <div className="w-full bg-white/80 border border-dashed border-neutral-200 dark:bg-neutral-900/40 dark:border-neutral-700 rounded-2xl p-3 sm:p-4 space-y-3 shadow-2xs">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black uppercase tracking-widest pl-1">
-                Arama Sonuclari ({filtrelenmisSesler.length})
+              <h3 className="text-xs font-black uppercase tracking-widest pl-1 flex items-center gap-1.5">
+                <span>🔍</span> İçerik Arama Sonuçları ({filtrelenmisSesler.length})
               </h3>
               <button onClick={() => setAramaKelimesi("")} className="text-neutral-400 hover:text-red-500 text-xs font-bold transition-colors lowercase">Kapat</button>
             </div>
             {filtrelenmisSesler.length === 0 ? (
-              <div className="text-center py-4 text-slate-400 text-xs font-bold">Aradiginiz kriterde bir yedek kayit bulunamadi.</div>
+              <div className="text-center py-4 text-slate-400 text-xs font-bold">Aradığınız kelimeye uyan bir ses kaydı veya transkript bulunamadı.</div>
             ) : (
-              <div className="max-h-40 overflow-y-auto space-y-2 pr-1">
-                {filtrelenmisSesler.map((ses) => (
+              <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
+                {filtrelenmisSesler.map((ses: any) => (
                   <div
                     key={ses.id}
                     onClick={() => dosyayiAc(ses)}
                     className="bg-white border border-neutral-200 rounded-xl p-3 flex items-center justify-between gap-4 shadow-3xs cursor-pointer hover:bg-neutral-100 dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700 transition-all duration-200 active:scale-[0.99]"
                   >
                     <div>
-                      <h4 className="font-bold text-xs">{ses.ad}</h4>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-xs">{ses.ad}</h4>
+                        {ses.eslesmeTuru && (
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-900">
+                            {ses.eslesmeTuru}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[9px] text-neutral-400 font-bold mt-0.5">{ses.tarih} • {ses.sure}</p>
                     </div>
                     <span className="text-[9px] font-black px-2.5 py-0.5 bg-neutral-100 border border-neutral-200 dark:bg-neutral-700 dark:border-neutral-600 rounded-full">
@@ -794,6 +823,9 @@ export default function AnaSayfa() {
             )}
           </div>
         </div>
+
+        {/* 📊 4. HAFTALIK VERİMLİLİK VE İSTATİSTİK DASHBOARD */}
+        <IstatistikPaneli sesler={tumKlasorSesleri} onKelimeSec={(k) => setAramaKelimesi(k)} />
 
         <div className="w-full border-t border-neutral-200 dark:border-neutral-800 pt-6">
           <div className="text-center p-5 sm:p-8 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-3xl text-neutral-400 dark:text-neutral-500 text-xs font-bold">
